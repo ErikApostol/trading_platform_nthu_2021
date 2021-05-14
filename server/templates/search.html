@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block head %}
+    <link href="{{ url_for('static', filename='css/forum.css') }}" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.min.css">
+    <link rel="stylesheet" href="https://cdn.materialdesignicons.com/3.2.89/css/materialdesignicons.min.css">
+{% endblock %}
+{% block content %}
+<main>
+    <div class="container-fluid">
+        <h1 class="mt-4">討論區搜尋結果</h1>
+        <ol class="breadcrumb mb-4">
+            <li class="breadcrumb-item active">搜尋結果 符合 {{ forum_data['count'] }} 筆資料</li>
+            <form class="d-none d-md-inline-block form-inline ml-auto mr-0 mr-md-3 my-2 my-md-0" method="GET" action="/forum/filter">
+                <div class="input-group">
+                    <input class="form-control" name="filter" type="text" placeholder="Search for..." />
+                    <div class="input-group-append">
+                        <button class="btn btn-primary"><i class="fas fa-search"></i></button>
+                    </div>
+                </div>
+            </form>
+        </ol>
+        {% for i in range(0, forum_data['count']) %}
+            <div class="box forum">
+                <article class="media">
+                    <div class="media-content">
+                        <div class="content list-forum">
+                            <p class="text-content">
+                                <a href="/post_page?post_id={{ forum_data['content'][i]['id'] }} ">{{ forum_data['content'][i]['title'] }} 
+                            <span class="solved" title="Solved">
+                            <i class="mdi mdi-checkbox-marked-circle"></i>
+                            </span>
+                        </a>
+                            </p>
+                            <p class="tags-content">
+                                <a class="tag is-rounded is-success">post by {{ forum_data['content'][i]['user_name'] }}</a>
+                                <a class="tag is-rounded is-warning">{{ forum_data['content'][i]['time'] }}</a>
+                            </p>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        {% endfor %}
+
+        
+    </div>
+</main>
+
+{% endblock %}
+
+{% block script %}
+    <script src="{{ url_for('static', filename='js/forum.js') }}"></script>
+{% endblock %}
+

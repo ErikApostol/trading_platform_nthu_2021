@@ -1,0 +1,872 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+<div id="layoutAuthentication">
+    <div id="layoutAuthentication_content">
+        <main>
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-lg-5">
+                        {% if tw=='false' %}
+                        <br/>
+                        <ol class="breadcrumb mb-4">
+                            <li class="breadcrumb-item active">注意比特幣與乙太幣的代碼分別為BTC-USD、ETH-USD</li>
+                            <li class="breadcrumb-item active">每兩次建立策略須間隔30秒，間隔時間少於30秒系統不會進行分析</li>
+                            <!-- <li class="breadcrumb-item active"></li> -->
+                        </ol>
+                        {% endif %}
+                        <div class="card shadow-lg border-0 rounded-lg mt-5">
+                            <div class="card-header"><h3 class="text-center font-weight-light my-4">建立投資組合{% if tw=='true' %}（台股）{% elif tw=='false' %}（不限台股）{% endif %}</h3></div>
+                            <div class="card-body">
+                                <form action="/create_strategy" method="POST" class="form-horizontal">
+                                    <div class="form-group">
+                                        <h4>為你的投組取一個名字：</h4>
+                                        <input type="text" name="strategy_name" id="strategy_name" placeholder="例如：絕對無敵投資王" />
+                                    </div>
+
+                                    <div class="form-group" id="items">
+                                        <h4>請選擇資產：</h4>
+                                        <!--h5>（建議至少三個資產）</h5-->
+                                        <div class="form-group">
+                                            <input list="dropdown" name="asset_ticker" id="asset_ticker">
+                                            <datalist id="dropdown">
+                                                {% for ticker in asset_candidates %}
+                                                <option value="{{ticker[0]}}">{{ticker[0]}}: {{ticker[1]}}</option>
+                                                {% endfor %}
+                                            </datalist>
+                                            <button id=delete class="btn btn-danger"> X </button>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <h4>您所參加的課程/競賽：</h4>
+                                        {% include 'competition_select.html' %}
+                                    </div>
+                                    <input type="hidden" id="tw" name="tw" value="{{ tw }}">
+
+                                    <div class="form-group">
+                                        <input type="button" value="add entry" id="add" class="btn btn-primary"/>
+                                        <input type="submit" value="submit" class="btn btn-success" onclick="return confirm('按下「OK/是/確定」之後，您的投組就立即送出。您可以離開或關閉這個頁面，分析程式會繼續執行。但是請不要重複按「Submit」按鈕。')"/>
+                                    </div>
+                                </form>
+                                <script src="{{ url_for('static', filename='js/jquery-3.5.1.min.js') }}"></script>
+                                <script>
+                                    $(document).ready(function(){
+                                        $("#add").click(function(e){
+                                            event.preventDefault()
+                                            $('#items').append('<div class="form-group">'+
+                                                               '    <input list="dropdown" name="asset_ticker" id="asset_ticker">'+
+                                                               '    <datalist id="dropdown">'+
+                                                                        {% for ticker in asset_candidates %}
+                                                               '        <option value="{{ticker}}">{{ticker[0]}}: {{ticker[1]}}</option>'+
+                                                                        {% endfor %}
+                                                               '    </datalist>'+
+                                                               '    <button id=delete class="btn btn-danger"> X </button>'+
+                                                               '</div>'
+                                            );
+                                        });
+                                    
+                                        $('body').on('click', '#delete', function(e){
+                                            $(this).parent('div').remove();
+                                        });
+                                    
+                                    });
+                                </script>
+                                
+                            </div>
+                            <div class="card-footer text-center">
+                                <div class="small"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    {% if tw=='false' %}
+    <div class="card mb-4">
+        <div class="card-header"><i class="fas fa-table mr-1"></i>擂台上所有的資產列表</div>
+        <div class="card-body">
+            <div class="accordion" id="accordionExample">
+                <div class="card">
+                    <div class="card-header" id="headingOne">
+                        <h2 class="mb-0">
+                            <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                                S&amp;P 500 Communication 產業
+                            </button>
+                        </h2>
+                    </div>
+    
+                    <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordionExample">
+                        <div class="card-body">
+                            <p>ATVI: Activision Blizzard, Inc.</p>
+                            <p>GOOG: Alphabet Inc.</p>
+                            <p>GOOG.L: Alphabet Inc.</p>
+                            <p>T: AT&amp;T Inc.</p>
+                            <p>CTL: CenturyLink, Inc.</p>
+                            <p>CHTR: Charter Communications, Inc.</p>
+                            <p>CMCS.A: Comcast Corporation</p>
+                            <p>DISC.K: Discovery, Inc.</p>
+                            <p>DISC.A: Discovery, Inc.</p>
+                            <p>DISH: DISH Network Corporation</p>
+                            <p>EA: Electronic Arts Inc.</p>
+                            <p>FB: Facebook, Inc.</p>
+                            <p>FOXA: Fox Corporation</p>
+                            <p>FOX: Fox Corporation</p>
+                            <p>LYV: Live Nation Entertainment, Inc.</p>
+                            <p>NFLX: Netflix, Inc.</p>
+                            <p>NWS: News Corporation</p>
+                            <p>NWSA: News Corporation</p>
+                            <p>OMC: Omnicom Group Inc.</p>
+                            <p>TTWO: Take-Two Interactive Software, Inc.</p>
+                            <p>IPG: The Interpublic Group of Companies, Inc.</p>
+                            <p>DIS: The Walt Disney Company</p>
+                            <p>TMUS: T-Mobile US, Inc.</p>
+                            <p>TWTR: Twitter, Inc.</p>
+                            <p>VZ: Verizon Communications Inc.</p>
+                            <p>VIAC: ViacomCBS Inc.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header" id="headingTwo">
+                        <h2 class="mb-0">
+                            <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                S&amp;P 500 Consumer Discretionary 產業
+                            </button>
+                        </h2>
+                    </div>
+                    <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionExample">
+                        <div class="card-body">
+                            <p>AAP: Advance Auto Parts, Inc.</p>
+                            <p>AMZN: Amazon.com, Inc.</p>
+                            <p>APTV: Aptiv PLC</p>
+                            <p>AZO: AutoZone, Inc.</p>
+                            <p>BBY: Best Buy Co., Inc.</p>
+                            <p>BKNG: Booking Holdings Inc.</p>
+                            <p>BWA: BorgWarner Inc.</p>
+                            <p>KMX: CarMax, Inc.</p>
+                            <p>CCL: Carnival Corporation &amp; Plc</p>
+                            <p>CMG: Chipotle Mexican Grill, Inc.</p>
+                            <p>DHI: D.R. Horton, Inc.</p>
+                            <p>DRI: Darden Restaurants, Inc.</p>
+                            <p>DG: Dollar General Corporation</p>
+                            <p>DLTR: Dollar Tree, Inc.</p>
+                            <p>DPZ: Domino's Pizza, Inc.</p>
+                            <p>EBAY: eBay Inc.</p>
+                            <p>EXPE: Expedia Group, Inc.</p>
+                            <p>F: Ford Motor Company</p>
+                            <p>GRMN: Garmin Ltd.</p>
+                            <p>GM: General Motors Company</p>
+                            <p>GPC: Genuine Parts Company</p>
+                            <p>HRB: H&amp;R Block, Inc.</p>
+                            <p>HBI: Hanesbrands Inc.</p>
+                            <p>HAS: Hasbro, Inc.</p>
+                            <p>HLT: Hilton Worldwide Holdings Inc.</p>
+                            <p>KSS: Kohl's Corporation</p>
+                            <p>LB: L Brands, Inc.</p>
+                            <p>LVS: Las Vegas Sands Corp.</p>
+                            <p>LEG: Leggett &amp; Platt, Incorporated</p>
+                            <p>LEN: Lennar Corporation</p>
+                            <p>LKQ: LKQ Corporation</p>
+                            <p>LOW: Lowe's Companies, Inc.</p>
+                            <p>MAR: Marriott International, Inc.</p>
+                            <p>MCD: McDonald's Corporation</p>
+                            <p>MGM: MGM Resorts International</p>
+                            <p>MHK: Mohawk Industries, Inc.</p>
+                            <p>NWL: Newell Brands Inc.</p>
+                            <p>NKE: NIKE, Inc.</p>
+                            <p>NCLH: Norwegian Cruise Line Holdings Ltd.</p>
+                            <p>NVR: NVR, Inc.</p>
+                            <p>ORLY: O'Reilly Automotive, Inc.</p>
+                            <p>PHM: PulteGroup, Inc.</p>
+                            <p>PVH: PVH Corp.</p>
+                            <p>RL: Ralph Lauren Corporation</p>
+                            <p>ROST: Ross Stores, Inc.</p>
+                            <p>RCL: Royal Caribbean Group</p>
+                            <p>SBUX: Starbucks Corporation</p>
+                            <p>TPR: Tapestry, Inc.</p>
+                            <p>TGT: Target Corporation</p>
+                            <p>GPS: The Gap, Inc.</p>
+                            <p>HD: The Home Depot, Inc.</p>
+                            <p>TJX: The TJX Companies, Inc.</p>
+                            <p>TIF: Tiffany &amp; Co.</p>
+                            <p>TSCO: Tractor Supply Company</p>
+                            <p>ULTA: Ulta Beauty, Inc.</p>
+                            <p>UA: Under Armour, Inc.</p>
+                            <p>UAA: Under Armour, Inc.</p>
+                            <p>VFC: V.F. Corporation</p>
+                            <p>WHR: Whirlpool Corporation</p>
+                            <p>WYNN: Wynn Resorts, Limited</p>
+                            <p>YUM: Yum! Brands, Inc.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header" id="headingThree">
+                        <h2 class="mb-0">
+                            <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                S&amp;P 500 Consumer Staples 產業
+                            </button>
+                        </h2>
+                    </div>
+                    <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#accordionExample">
+                        <div class="card-body">
+                            <p>MO: Altria Group, Inc.</p>
+                            <p>ADM: Archer-Daniels-Midland Company</p>
+                            <p>BF.B: Brown-Forman Corporation</p>
+                            <p>CPB: Campbell Soup Company</p>
+                            <p>CHD: Church &amp; Dwight Co., Inc.</p>
+                            <p>CL: Colgate-Palmolive Company</p>
+                            <p>CAG: Conagra Brands, Inc.</p>
+                            <p>STZ: Constellation Brands, Inc.</p>
+                            <p>COST: Costco Wholesale Corporation</p>
+                            <p>COTY: Coty Inc.</p>
+                            <p>GIS: General Mills, Inc.</p>
+                            <p>HRL: Hormel Foods Corporation</p>
+                            <p>K: Kellogg Company</p>
+                            <p>KMB: Kimberly-Clark Corporation</p>
+                            <p>LW: Lamb Weston Holdings, Inc.</p>
+                            <p>MKC: McCormick &amp; Company, Incorporated</p>
+                            <p>TAP: Molson Coors Beverage Company</p>
+                            <p>MDLZ: Mondelez International, Inc.</p>
+                            <p>MNST: Monster Beverage Corporation</p>
+                            <p>PEP: PepsiCo, Inc.</p>
+                            <p>PM: Philip Morris International Inc.</p>
+                            <p>SYY: Sysco Corporation</p>
+                            <p>CLX: The Clorox Company</p>
+                            <p>KO: The Coca-Cola Company</p>
+                            <p>EL: The Estée Lauder Companies Inc.</p>
+                            <p>HSY: The Hershey Company</p>
+                            <p>SJM: The J. M. Smucker Company</p>
+                            <p>KHC: The Kraft Heinz Company</p>
+                            <p>KR: The Kroger Co.</p>
+                            <p>PG: The Procter &amp; Gamble Company</p>
+                            <p>TSN: Tyson Foods, Inc.</p>
+                            <p>WBA: Walgreens Boots Alliance, Inc.</p>
+                            <p>WMT: Walmart Inc.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header" id="headingFour">
+                        <h2 class="mb-0">
+                            <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+                                S&amp;P 500 Energy 產業
+                            </button>
+                        </h2>
+                    </div>
+    
+                    <div id="collapseFour" class="collapse" aria-labelledby="headingFour" data-parent="#accordionExample">
+                        <div class="card-body">
+                            <p>APA: Apache Corporation</p>
+                            <p>BKR: Baker Hughes Company</p>
+                            <p>COG: Cabot Oil &amp; Gas Corporation</p>
+                            <p>CVX: Chevron Corporation</p>
+                            <p>CXO: Concho Resources Inc.</p>
+                            <p>COP: ConocoPhillips</p>
+                            <p>DVN: Devon Energy Corporation</p>
+                            <p>FANG: Diamondback Energy, Inc.</p>
+                            <p>EOG: EOG Resources, Inc.</p>
+                            <p>XOM: Exxon Mobil Corporation</p>
+                            <p>HAL: Halliburton Company</p>
+                            <p>HES: Hess Corporation</p>
+                            <p>HFC: HollyFrontier Corporation</p>
+                            <p>KMI: Kinder Morgan, Inc.</p>
+                            <p>MRO: Marathon Oil Corporation</p>
+                            <p>MPC: Marathon Petroleum Corporation</p>
+                            <p>NOV: National Oilwell Varco, Inc.</p>
+                            <p>NBL: Noble Energy, Inc.</p>
+                            <p>OXY: Occidental Petroleum Corporation</p>
+                            <p>OKE: ONEOK, Inc.</p>
+                            <p>PSX: Phillips 66</p>
+                            <p>PXD: Pioneer Natural Resources Company</p>
+                            <p>SLB: Schlumberger Limited</p>
+                            <p>FTI: TechnipFMC plc</p>
+                            <p>WMB: The Williams Companies, Inc.</p>
+                            <p>VLO: Valero Energy Corporation</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header" id="headingFive">
+                        <h2 class="mb-0">
+                            <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapseFive" aria-expanded="false" aria-controls="collapseFive">
+                                S&amp;P 500 Financials 產業
+                            </button>
+                        </h2>
+                    </div>
+    
+                    <div id="collapseFive" class="collapse" aria-labelledby="headingFive" data-parent="#accordionExample">
+                        <div class="card-body">
+                            <p>AFL: Aflac Incorporated</p>
+                            <p>AXP: American Express Company</p>
+                            <p>AIG: American International Group, Inc.</p>
+                            <p>AMP: Ameriprise Financial, Inc.</p>
+                            <p>AON: Aon Plc</p>
+                            <p>AJG: Arthur J. Gallagher &amp; Co.</p>
+                            <p>AIZ: Assurant, Inc.</p>
+                            <p>BAC: Bank of America Corporation</p>
+                            <p>BRK.B: Berkshire Hathaway Inc.</p>
+                            <p>BLK: BlackRock, Inc.</p>
+                            <p>COF: Capital One Financial Corporation</p>
+                            <p>CBOE: Cboe Global Markets, Inc.</p>
+                            <p>CB: Chubb Limited</p>
+                            <p>CINF: Cincinnati Financial Corporation</p>
+                            <p>C: Citigroup Inc.</p>
+                            <p>CFG: Citizens Financial Group, Inc.</p>
+                            <p>CME: CME Group Inc.</p>
+                            <p>CMA: Comerica Incorporated</p>
+                            <p>DFS: Discover Financial Services</p>
+                            <p>ETFC: E*TRADE Financial Corporation</p>
+                            <p>RE: Everest Re Group, Ltd.</p>
+                            <p>FITB: Fifth Third Bancorp</p>
+                            <p>FRC: First Republic Bank</p>
+                            <p>BEN: Franklin Resources, Inc.</p>
+                            <p>GL: Globe Life Inc.</p>
+                            <p>HBAN: Huntington Bancshares Incorporated</p>
+                            <p>ICE: Intercontinental Exchange, Inc.</p>
+                            <p>IVZ: Invesco Ltd.</p>
+                            <p>JPM: JPMorgan Chase &amp; Co.</p>
+                            <p>KEY: KeyCorp</p>
+                            <p>LNC: Lincoln National Corporation</p>
+                            <p>L: Loews Corporation</p>
+                            <p>MTB: M&amp;T Bank Corporation</p>
+                            <p>MKTX: MarketAxess Holdings Inc.</p>
+                            <p>MMC: Marsh &amp; McLennan Companies, Inc.</p>
+                            <p>MET: MetLife, Inc.</p>
+                            <p>MCO: Moody's Corporation</p>
+                            <p>MS: Morgan Stanley</p>
+                            <p>MSCI: MSCI Inc.</p>
+                            <p>NDAQ: Nasdaq, Inc.</p>
+                            <p>NTRS: Northern Trust Corporation</p>
+                            <p>PBCT: People's United Financial, Inc.</p>
+                            <p>PFG: Principal Financial Group, Inc.</p>
+                            <p>PRU: Prudential Financial, Inc.</p>
+                            <p>RJF: Raymond James Financial, Inc.</p>
+                            <p>RF: Regions Financial Corporation</p>
+                            <p>SPGI: S&amp;P Global Inc.</p>
+                            <p>STT: State Street Corporation</p>
+                            <p>SIVB: SVB Financial Group</p>
+                            <p>SYF: Synchrony Financial</p>
+                            <p>TROW: T. Rowe Price Group, Inc.</p>
+                            <p>ALL: The Allstate Corporation</p>
+                            <p>BK: The Bank of New York Mellon Corporation</p>
+                            <p>SCHW: The Charles Schwab Corporation</p>
+                            <p>GS: The Goldman Sachs Group, Inc.</p>
+                            <p>HIG: The Hartford Financial Services Group, Inc.</p>
+                            <p>PNC: The PNC Financial Services Group, Inc.</p>
+                            <p>PGR: The Progressive Corporation</p>
+                            <p>TRV: The Travelers Companies, Inc.</p>
+                            <p>TFC: Truist Financial Corporation</p>
+                            <p>USB: U.S. Bancorp</p>
+                            <p>UNM: Unum Group</p>
+                            <p>WRB: W. R. Berkley Corporation</p>
+                            <p>WFC: Wells Fargo &amp; Company</p>
+                            <p>WLTW: Willis Towers Watson Public Limited Company</p>
+                            <p>ZION: Zions Bancorporation, National Association</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header" id="headingSix">
+                        <h2 class="mb-0">
+                            <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapseSix" aria-expanded="false" aria-controls="collapseSix">
+                                S&amp;P 500 Health Care 產業
+                            </button>
+                        </h2>
+                    </div>
+    
+                    <div id="collapseSix" class="collapse" aria-labelledby="headingSix" data-parent="#accordionExample">
+                        <div class="card-body">
+                            <p>ABT: Abbott Laboratories</p>
+                            <p>ABBV: AbbVie Inc.</p>
+                            <p>ABMD: Abiomed, Inc.</p>
+                            <p>A: Agilent Technologies, Inc.</p>
+                            <p>ALXN: Alexion Pharmaceuticals, Inc.</p>
+                            <p>ALGN: Align Technology, Inc.</p>
+                            <p>ABC: AmerisourceBergen Corporation</p>
+                            <p>AMGN: Amgen Inc.</p>
+                            <p>ANTM: Anthem, Inc.</p>
+                            <p>BAX: Baxter International Inc.</p>
+                            <p>BDX: Becton, Dickinson and Company</p>
+                            <p>BIIB: Biogen Inc.</p>
+                            <p>BIO: Bio-Rad Laboratories, Inc.</p>
+                            <p>BSX: Boston Scientific Corporation</p>
+                            <p>BMY: Bristol-Myers Squibb Company</p>
+                            <p>CAH: Cardinal Health, Inc.</p>
+                            <p>CNC: Centene Corporation</p>
+                            <p>CERN: Cerner Corporation</p>
+                            <p>CI: Cigna Corporation</p>
+                            <p>CVS: CVS Health Corporation</p>
+                            <p>DHR: Danaher Corporation</p>
+                            <p>DVA: DaVita Inc.</p>
+                            <p>XRAY: DENTSPLY SIRONA Inc.</p>
+                            <p>DXCM: DexCom, Inc.</p>
+                            <p>EW: Edwards Lifesciences Corporation</p>
+                            <p>LLY: Eli Lilly and Company</p>
+                            <p>GILD: Gilead Sciences, Inc.</p>
+                            <p>HCA: HCA Healthcare, Inc.</p>
+                            <p>HSIC: Henry Schein, Inc.</p>
+                            <p>HOLX: Hologic, Inc.</p>
+                            <p>HUM: Humana Inc.</p>
+                            <p>IDXX: IDEXX Laboratories, Inc.</p>
+                            <p>ILMN: Illumina, Inc.</p>
+                            <p>INCY: Incyte Corporation</p>
+                            <p>ISRG: Intuitive Surgical, Inc.</p>
+                            <p>IQV: IQVIA Holdings Inc.</p>
+                            <p>JNJ: Johnson &amp; Johnson</p>
+                            <p>LH: Laboratory Corporation of America Holdings</p>
+                            <p>MCK: McKesson Corporation</p>
+                            <p>MDT: Medtronic plc</p>
+                            <p>MRK: Merck &amp; Co., Inc.</p>
+                            <p>MTD: Mettler-Toledo International Inc.</p>
+                            <p>MYL: Mylan N.V.</p>
+                            <p>PKI: PerkinElmer, Inc.</p>
+                            <p>PRGO: Perrigo Company plc</p>
+                            <p>PFE: Pfizer Inc.</p>
+                            <p>DGX: Quest Diagnostics Incorporated</p>
+                            <p>REGN: Regeneron Pharmaceuticals, Inc.</p>
+                            <p>RMD: ResMed Inc.</p>
+                            <p>STE: STERIS plc</p>
+                            <p>SYK: Stryker Corporation</p>
+                            <p>TFX: Teleflex Incorporated</p>
+                            <p>COO: The Cooper Companies, Inc.</p>
+                            <p>TMO: Thermo Fisher Scientific Inc.</p>
+                            <p>UNH: UnitedHealth Group Incorporated</p>
+                            <p>UHS: Universal Health Services, Inc.</p>
+                            <p>VAR: Varian Medical Systems, Inc.</p>
+                            <p>VRTX: Vertex Pharmaceuticals Incorporated</p>
+                            <p>WAT: Waters Corporation</p>
+                            <p>WST: West Pharmaceutical Services, Inc.</p>
+                            <p>ZBH: Zimmer Biomet Holdings, Inc.</p>
+                            <p>ZTS: Zoetis Inc.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header" id="headingSeven">
+                        <h2 class="mb-0">
+                            <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapseSeven" aria-expanded="false" aria-controls="collapseSeven">
+                                S&amp;P 500 Industrials 產業
+                            </button>
+                        </h2>
+                    </div>
+    
+                    <div id="collapseSeven" class="collapse" aria-labelledby="headingSeven" data-parent="#accordionExample">
+                        <div class="card-body">
+                            <p>MMM: 3M Company</p>
+                            <p>AOS: A. O. Smith Corporation</p>
+                            <p>ALK: Alaska Air Group, Inc.</p>
+                            <p>ALLE: Allegion plc</p>
+                            <p>AAL: American Airlines Group Inc.</p>
+                            <p>AME: AMETEK, Inc.</p>
+                            <p>CHRW: C.H. Robinson Worldwide, Inc.</p>
+                            <p>CARR: Carrier Global Corporation</p>
+                            <p>CAT: Caterpillar Inc.</p>
+                            <p>CTAS: Cintas Corporation</p>
+                            <p>CPRT: Copart, Inc.</p>
+                            <p>CSX: CSX Corporation</p>
+                            <p>CMI: Cummins Inc.</p>
+                            <p>DE: Deere &amp; Company</p>
+                            <p>DAL: Delta Air Lines, Inc.</p>
+                            <p>DOV: Dover Corporation</p>
+                            <p>ETN: Eaton Corporation plc</p>
+                            <p>EMR: Emerson Electric Co.</p>
+                            <p>EFX: Equifax Inc.</p>
+                            <p>EXPD: Expeditors International of Washington, Inc.</p>
+                            <p>FAST: Fastenal Company</p>
+                            <p>FDX: FedEx Corporation</p>
+                            <p>FLS: Flowserve Corporation</p>
+                            <p>FTV: Fortive Corporation</p>
+                            <p>FBHS: Fortune Brands Home &amp; Security, Inc.</p>
+                            <p>GD: General Dynamics Corporation</p>
+                            <p>GE: General Electric Company</p>
+                            <p>HON: Honeywell International Inc.</p>
+                            <p>HWM: Howmet Aerospace Inc.</p>
+                            <p>HII: Huntington Ingalls Industries, Inc.</p>
+                            <p>IEX: IDEX Corporation</p>
+                            <p>INFO: IHS Markit Ltd.</p>
+                            <p>ITW: Illinois Tool Works Inc.</p>
+                            <p>IR: Ingersoll Rand Inc.</p>
+                            <p>JBHT: J.B. Hunt Transport Services, Inc.</p>
+                            <p>J: Jacobs Engineering Group Inc.</p>
+                            <p>JCI: Johnson Controls International plc</p>
+                            <p>KSU: Kansas City Southern</p>
+                            <p>LHX: L3Harris Technologies, Inc.</p>
+                            <p>LMT: Lockheed Martin Corporation</p>
+                            <p>MAS: Masco Corporation</p>
+                            <p>NLSN: Nielsen Holdings plc</p>
+                            <p>NSC: Norfolk Southern Corporation</p>
+                            <p>NOC: Northrop Grumman Corporation</p>
+                            <p>ODFL: Old Dominion Freight Line, Inc.</p>
+                            <p>OTIS: Otis Worldwide Corporation</p>
+                            <p>PCAR: PACCAR Inc</p>
+                            <p>PH: Parker-Hannifin Corporation</p>
+                            <p>PNR: Pentair plc</p>
+                            <p>PWR: Quanta Services, Inc.</p>
+                            <p>RTX: Raytheon Technologies Corporation</p>
+                            <p>RSG: Republic Services, Inc.</p>
+                            <p>RHI: Robert Half International Inc.</p>
+                            <p>ROK: Rockwell Automation, Inc.</p>
+                            <p>ROL: Rollins, Inc.</p>
+                            <p>ROP: Roper Technologies, Inc.</p>
+                            <p>SNA: Snap-on Incorporated</p>
+                            <p>LUV: Southwest Airlines Co.</p>
+                            <p>SWK: Stanley Black &amp; Decker, Inc.</p>
+                            <p>TDY: Teledyne Technologies Incorporated</p>
+                            <p>TXT: Textron Inc.</p>
+                            <p>BA: The Boeing Company</p>
+                            <p>TT: Trane Technologies plc</p>
+                            <p>TDG: TransDigm Group Incorporated</p>
+                            <p>UNP: Union Pacific Corporation</p>
+                            <p>UAL: United Airlines Holdings, Inc.</p>
+                            <p>UPS: United Parcel Service, Inc.</p>
+                            <p>URI: United Rentals, Inc.</p>
+                            <p>VRSK: Verisk Analytics, Inc.</p>
+                            <p>GWW: W.W. Grainger, Inc.</p>
+                            <p>WAB: Wabtec Corporation</p>
+                            <p>WM: Waste Management, Inc.</p>
+                            <p>XYL: Xylem Inc.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header" id="headingEight">
+                        <h2 class="mb-0">
+                            <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapseEight" aria-expanded="false" aria-controls="collapseEight">
+                                S&amp;P 500 Information Technology 產業
+                            </button>
+                        </h2>
+                    </div>
+    
+                    <div id="collapseEight" class="collapse" aria-labelledby="headingEight" data-parent="#accordionExample">
+                        <div class="card-body">
+                            <p>ACN: Accenture plc</p>
+                            <p>ADBE: Adobe Inc.</p>
+                            <p>AMD: Advanced Micro Devices, Inc.</p>
+                            <p>AKAM: Akamai Technologies, Inc.</p>
+                            <p>APH: Amphenol Corporation</p>
+                            <p>ADI: Analog Devices, Inc.</p>
+                            <p>ANSS: ANSYS, Inc.</p>
+                            <p>AAPL: Apple Inc.</p>
+                            <p>AMAT: Applied Materials, Inc.</p>
+                            <p>ANET: Arista Networks, Inc.</p>
+                            <p>ADSK: Autodesk, Inc.</p>
+                            <p>ADP: Automatic Data Processing, Inc.</p>
+                            <p>AVGO: Broadcom Inc.</p>
+                            <p>BR: Broadridge Financial Solutions, Inc.</p>
+                            <p>CDNS: Cadence Design Systems, Inc.</p>
+                            <p>CDW: CDW Corporation</p>
+                            <p>CSCO: Cisco Systems, Inc.</p>
+                            <p>CTXS: Citrix Systems, Inc.</p>
+                            <p>CTSH: Cognizant Technology Solutions Corporation</p>
+                            <p>GLW: Corning Incorporated</p>
+                            <p>DXC: DXC Technology Company</p>
+                            <p>FFIV: F5 Networks, Inc.</p>
+                            <p>FIS: Fidelity National Information Services, Inc.</p>
+                            <p>FISV: Fiserv, Inc.</p>
+                            <p>FLT: FLEETCOR Technologies, Inc.</p>
+                            <p>FLIR: FLIR Systems, Inc.</p>
+                            <p>FTNT: Fortinet, Inc.</p>
+                            <p>IT: Gartner, Inc.</p>
+                            <p>GPN: Global Payments Inc.</p>
+                            <p>HPE: Hewlett Packard Enterprise Company</p>
+                            <p>HPQ: HP Inc.</p>
+                            <p>INTC: Intel Corporation</p>
+                            <p>IBM: International Business Machines Corporation</p>
+                            <p>INTU: Intuit Inc.</p>
+                            <p>IPGP: IPG Photonics Corporation</p>
+                            <p>JKHY: Jack Henry &amp; Associates, Inc.</p>
+                            <p>JNPR: Juniper Networks, Inc.</p>
+                            <p>KEYS: Keysight Technologies, Inc.</p>
+                            <p>KLAC: KLA Corporation</p>
+                            <p>LRCX: Lam Research Corporation</p>
+                            <p>LDOS: Leidos Holdings, Inc.</p>
+                            <p>MA: Mastercard Incorporated</p>
+                            <p>MXIM: Maxim Integrated Products, Inc.</p>
+                            <p>MCHP: Microchip Technology Incorporated</p>
+                            <p>MU: Micron Technology, Inc.</p>
+                            <p>MSFT: Microsoft Corporation</p>
+                            <p>MSI: Motorola Solutions, Inc.</p>
+                            <p>NTAP: NetApp, Inc.</p>
+                            <p>NLOK: NortonLifeLock Inc.</p>
+                            <p>NVDA: NVIDIA Corporation</p>
+                            <p>ORCL: Oracle Corporation</p>
+                            <p>PAYX: Paychex, Inc.</p>
+                            <p>PAYC: Paycom Software, Inc.</p>
+                            <p>PYPL: PayPal Holdings, Inc.</p>
+                            <p>QRVO: Qorvo, Inc.</p>
+                            <p>QCOM: QUALCOMM Incorporated</p>
+                            <p>CRM: salesforce.com, inc.</p>
+                            <p>STX: Seagate Technology plc</p>
+                            <p>NOW: ServiceNow, Inc.</p>
+                            <p>SWKS: Skyworks Solutions, Inc.</p>
+                            <p>SNPS: Synopsys, Inc.</p>
+                            <p>TEL: TE Connectivity Ltd.</p>
+                            <p>TXN: Texas Instruments Incorporated</p>
+                            <p>WU: The Western Union Company</p>
+                            <p>TYL: Tyler Technologies, Inc.</p>
+                            <p>VRSN: VeriSign, Inc.</p>
+                            <p>V: Visa Inc.</p>
+                            <p>WDC: Western Digital Corporation</p>
+                            <p>XRX: Xerox Holdings Corporation</p>
+                            <p>XLNX: Xilinx, Inc.</p>
+                            <p>ZBRA: Zebra Technologies Corporation</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header" id="headingNine">
+                        <h2 class="mb-0">
+                            <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapseNine" aria-expanded="false" aria-controls="collapseNine">
+                                S&amp;P 500 Materials 產業
+                            </button>
+                        </h2>
+                    </div>
+    
+                    <div id="collapseNine" class="collapse" aria-labelledby="headingNine" data-parent="#accordionExample">
+                        <div class="card-body">
+                            <p>APD: Air Products and Chemicals, Inc.</p>
+                            <p>ALB: Albemarle Corporation</p>
+                            <p>AMCR: Amcor plc</p>
+                            <p>AVY: Avery Dennison Corporation</p>
+                            <p>BLL: Ball Corporation</p>
+                            <p>CE: Celanese Corporation</p>
+                            <p>CF: CF Industries Holdings, Inc.</p>
+                            <p>CTVA: Corteva, Inc.</p>
+                            <p>DOW: Dow Inc.</p>
+                            <p>DD: DuPont de Nemours, Inc.</p>
+                            <p>EMN: Eastman Chemical Company</p>
+                            <p>ECL: Ecolab Inc.</p>
+                            <p>FMC: FMC Corporation</p>
+                            <p>FCX: Freeport-McMoRan Inc.</p>
+                            <p>IFF: International Flavors &amp; Fragrances Inc.</p>
+                            <p>IP: International Paper Company</p>
+                            <p>LIN: Linde plc</p>
+                            <p>LYB: LyondellBasell Industries N.V.</p>
+                            <p>MLM: Martin Marietta Materials, Inc.</p>
+                            <p>NEM: Newmont Corporation</p>
+                            <p>NUE: Nucor Corporation</p>
+                            <p>PKG: Packaging Corporation of America</p>
+                            <p>PPG: PPG Industries, Inc.</p>
+                            <p>SEE: Sealed Air Corporation</p>
+                            <p>MOS: The Mosaic Company</p>
+                            <p>SHW: The Sherwin-Williams Company</p>
+                            <p>VMC: Vulcan Materials Company</p>
+                            <p>WRK: WestRock Company</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header" id="headingTen">
+                        <h2 class="mb-0">
+                            <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapseTen" aria-expanded="false" aria-controls="collapseTen">
+                                S&amp;P 500 Real Estate 產業
+                            </button>
+                        </h2>
+                    </div>
+    
+                    <div id="collapseTen" class="collapse" aria-labelledby="headingTen" data-parent="#accordionExample">
+                        <div class="card-body">
+                            <p>ARE: Alexandria Real Estate Equities, Inc.</p>
+                            <p>AMT: American Tower Corporation (REIT)</p>
+                            <p>AIV: Apartment Investment and Management Company</p>
+                            <p>AVB: AvalonBay Communities, Inc.</p>
+                            <p>BXP: Boston Properties, Inc.</p>
+                            <p>CBRE: CBRE Group, Inc.</p>
+                            <p>CCI: Crown Castle International Corp. (REIT)</p>
+                            <p>DLR: Digital Realty Trust, Inc.</p>
+                            <p>DRE: Duke Realty Corporation</p>
+                            <p>EQIX: Equinix, Inc. (REIT)</p>
+                            <p>EQR: Equity Residential</p>
+                            <p>ESS: Essex Property Trust, Inc.</p>
+                            <p>EXR: Extra Space Storage Inc.</p>
+                            <p>FRT: Federal Realty Investment Trust</p>
+                            <p>PEAK: Healthpeak Properties, Inc.</p>
+                            <p>HST: Host Hotels &amp; Resorts, Inc.</p>
+                            <p>IRM: Iron Mountain Incorporated</p>
+                            <p>KIM: Kimco Realty Corporation</p>
+                            <p>MAA: Mid-America Apartment Communities, Inc.</p>
+                            <p>PLD: Prologis, Inc.</p>
+                            <p>PSA: Public Storage</p>
+                            <p>O: Realty Income Corporation</p>
+                            <p>REG: Regency Centers Corporation</p>
+                            <p>SBAC: SBA Communications Corporation</p>
+                            <p>SPG: Simon Property Group, Inc.</p>
+                            <p>SLG: SL Green Realty Corp.</p>
+                            <p>UDR: UDR, Inc.</p>
+                            <p>VTR: Ventas, Inc.</p>
+                            <p>VNO: Vornado Realty Trust</p>
+                            <p>WELL: Welltower Inc.</p>
+                            <p>WY: Weyerhaeuser Company</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header" id="headingEleven">
+                        <h2 class="mb-0">
+                            <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapseEleven" aria-expanded="false" aria-controls="collapseEleven">
+                                S&amp;P 500 Utilities 產業
+                            </button>
+                        </h2>
+                    </div>
+    
+                    <div id="collapseEleven" class="collapse" aria-labelledby="headingEleven" data-parent="#accordionExample">
+                        <div class="card-body">
+                            <p>LNT: Alliant Energy Corporation</p>
+                            <p>AEE: Ameren Corporation</p>
+                            <p>AEP: American Electric Power Company, Inc.</p>
+                            <p>AWK: American Water Works Company, Inc.</p>
+                            <p>ATO: Atmos Energy Corporation</p>
+                            <p>CNP: CenterPoint Energy, Inc.</p>
+                            <p>CMS: CMS Energy Corporation</p>
+                            <p>ED: Consolidated Edison, Inc.</p>
+                            <p>D: Dominion Energy, Inc.</p>
+                            <p>DTE: DTE Energy Company</p>
+                            <p>DUK: Duke Energy Corporation</p>
+                            <p>EIX: Edison International</p>
+                            <p>ETR: Entergy Corporation</p>
+                            <p>EVRG: Evergy, Inc.</p>
+                            <p>ES: Eversource Energy</p>
+                            <p>EXC: Exelon Corporation</p>
+                            <p>FE: FirstEnergy Corp.</p>
+                            <p>NEE: NextEra Energy, Inc.</p>
+                            <p>NI: NiSource Inc.</p>
+                            <p>NRG: NRG Energy, Inc.</p>
+                            <p>PNW: Pinnacle West Capital Corporation</p>
+                            <p>PPL: PPL Corporation</p>
+                            <p>PEG: Public Service Enterprise Group Incorporated</p>
+                            <p>SRE: Sempra Energy</p>
+                            <p>AES: The AES Corporation</p>
+                            <p>SO: The Southern Company</p>
+                            <p>WEC: WEC Energy Group, Inc.</p>
+                            <p>XEL: Xcel Energy Inc.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header" id="headingTwelve">
+                        <h2 class="mb-0">
+                            <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapseTwelve" aria-expanded="false" aria-controls="collapseTwelve">
+                                臺灣50成份股
+                            </button>
+                        </h2>
+                    </div>
+    
+                    <div id="collapseTwelve" class="collapse" aria-labelledby="headingTwelve" data-parent="#accordionExample">
+                        <div class="card-body">
+                            <p>1101.TW: 台　泥</p>
+                            <p>1102.TW: 亞　泥</p>
+                            <p>1216.TW: 統　一</p>
+                            <p>1301.TW: 台　塑</p>
+                            <p>1303.TW: 南　亞</p>
+                            <p>1326.TW: 台　化</p>
+                            <p>1402.TW: 遠東新</p>
+                            <p>2002.TW: 中　鋼</p>
+                            <p>2105.TW: 正　新</p>
+                            <p>2207.TW: 和泰車</p>
+                            <p>2227.TW: 裕日車</p>
+                            <p>2301.TW: 光寶科</p>
+                            <p>2303.TW: 聯　電</p>
+                            <p>2308.TW: 台達電</p>
+                            <p>2317.TW: 鴻　海</p>
+                            <p>2327.TW: 國　巨</p>
+                            <p>2330.TW: 台積電</p>
+                            <p>2352.TW: 佳世達</p>
+                            <p>2357.TW: 華　碩</p>
+                            <p>2382.TW: 廣　達</p>
+                            <p>2395.TW: 研　華</p>
+                            <p>2408.TW: 南亞科</p>
+                            <p>2412.TW: 中華電</p>
+                            <p>2454.TW: 聯發科</p>
+                            <p>2474.TW: 可　成</p>
+                            <p>2609.TW: 陽　明</p>
+                            <p>2610.TW: 華　航</p>
+                            <p>2633.TW: 台灣高鐵</p> 
+                            <p>2801.TW: 彰　銀</p>
+                            <p>2823.TW: 中　壽</p>
+                            <p>2880.TW: 華南金</p>
+                            <p>2881.TW: 富邦金</p>
+                            <p>2882.TW: 國泰金</p>
+                            <p>2883.TW: 開發金</p>
+                            <p>2884.TW: 玉山金</p>
+                            <p>2885.TW: 元大金</p>
+                            <p>2886.TW: 兆豐金</p>
+                            <p>2887.TW: 台新金</p>
+                            <p>2888.TW: 新光金</p>
+                            <p>2890.TW: 永豐金</p>
+                            <p>2891.TW: 中信金</p>
+                            <p>2892.TW: 第一金</p>
+                            <p>2912.TW: 統一超</p>
+                            <p>3008.TW: 大立光</p>
+                            <p>3045.TW: 台灣大</p>
+                            <p>3711.TW: 日月光投控</p> 
+                            <p>4904.TW: 遠　傳</p>
+                            <p>4938.TW: 和　碩</p>
+                            <p>5871.TW: 中租-KY</p>
+                            <p>5876.TW: 上海商銀</p> 
+                            <p>5880.TW: 合庫金</p>
+                            <p>6505.TW: 台塑化</p>
+                            <p>6669.TW: 緯　穎</p>
+                            <p>9910.TW: 豐　泰</p>
+                            <p>0050.TW: 元大台灣50</p>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header" id="headingThirteen">
+                        <h2 class="mb-0">
+                            <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapseThirteen" aria-expanded="false" aria-controls="collapseThirteen">
+                                其它ETF
+                            </button>
+                        </h2>
+                    </div>
+    
+                    <div id="collapseThirteen" class="collapse" aria-labelledby="headingThirteen" data-parent="#accordionExample">
+                        <div class="card-body">
+                            <p>BIV: Vanguard Intermediate-Term Bond Index Fund ETF Shares</p>
+                            <p>LQD: iShares iBoxx $ Investment Grade Corporate Bond ETF</p>
+                            <p>MUB: iShares National Muni Bond ETF</p>
+                            <p>TLT: iShares 20+ Year Treasury Bond ETF</p>
+                            <p>VB: Vanguard Small-Cap Index Fund ETF Shares</p>
+                            <p>VNQ: Vanguard Real Estate Index Fund ETF Shares</p>
+                            <p>VOO: Vanguard S&amp;P 500 ETF</p>
+                            <p>VEA: Vanguard FTSE Developed Markets Index Fund ETF Shares</p>
+                            <p>VWO: Vanguard FTSE Emerging Markets Index Fund ETF Shares</p>
+                            <p>IAU: iShares Gold Trust</p>
+                            <p>ARKF: ARK Fintech Innovation ETF</p> 
+                            <p>ARKG: ARK Genomic Revolution ETF</p> 
+                            <p>ARKK: ARK Innovation ETF</p> 
+                            <p>ARKQ: ARK Autonomous Technology &amp; Robotics ETF</p> 
+                            <p>ARKW: ARK Next Generation Internet ETF</p>
+                            <p>SPY: SPDR S&amp;P 500 Trust ETF</p>
+                            <p>IEF: iShares 7-10 Year Treasury Bond ETF</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header" id="headingFourteen">
+                        <h2 class="mb-0">
+                            <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapseFourteen" aria-expanded="false" aria-controls="collapseFourteen">
+                                加密貨幣
+                            </button>
+                        </h2>
+                    </div>
+    
+                    <div id="collapseFourteen" class="collapse" aria-labelledby="headingFourteen" data-parent="#accordionExample">
+                        <div class="card-body">
+                            <p>BTC: Bitcoin 比特幣</p>
+                            <p>ETH: Ethereum 乙太幣</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+</div>
+{% endblock %}

@@ -1,0 +1,36 @@
+Tables:
+
+user:
+user_id: integer, auto increment, unique, primary key
+username: string, unique
+password: string
+
+strategy:
+strategy_id: integer, auto increment, unique, primary key
+strategy_name: text
+author: string
+create_date date not null,
+return: float
+sharpe_ratio: float
+max_drawdown: float
+
+assets_in_strategy:
+strategy_id: integer
+asset_ticker: string
+weight: float
+
+comment:
+comment_id: integer, auto increment, unique, primary key
+strategy_id: integer
+comment: string
+
+
+OK /, GET
+OK /create_strategy, GET, POST
+/forum, GET
+/forum_filter, POST
+/strategy/<int:id>: GET
+/post_comment: POST
+OK /register, GET, POST
+OK /login, GET, POST
+/logout, GET

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div id="layoutAuthentication">
+    <div id="layoutAuthentication_content">
+        <main>
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-lg-7">
+                        <div class="card shadow-lg border-0 rounded-lg mt-5">
+                            <div class="card-header"><h3 class="text-center font-weight-light my-4">建立帳號</h3></div>
+                            <div class="card-body">
+                                <form method="POST" action="/signup">
+                                    <div class="form-group">
+                                        <label class="small mb-1" for="inputEmailAddress">Email地址</label>
+                                        <input class="form-control py-4" type="text" name="username" placeholder="請輸入Email地址" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="small mb-1" for="inputEmailAddress">密碼</label>
+                                        <input class="form-control py-4" type="password" name="password" placeholder="請輸入密碼" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="small mb-1" for="inputEmailAddress">確認密碼</label>
+                                        <input class="form-control py-4" type="password" name="confirm_password" placeholder="請再輸入一次密碼" />
+                                    </div>
+                                    <button class="btn btn-primary btn-block">送出</button>
+                                </form>
+                            </div>
+                            <div class="card-footer text-center">
+                                <div class="small"><a href="/login">已有帳號？</a></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+{% endblock %}

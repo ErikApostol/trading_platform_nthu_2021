@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+<script src="{{ url_for('static', filename='js/result.js') }}"></script>
+{% block content %}
+<main>
+    <div class="container-fluid">
+        <h1 class="mt-4">分析結果排行（{% if tw=='true' %}台股{% else %}不限台股{% endif %}）</h1>
+        <ol class="breadcrumb mb-4">
+            <li class="breadcrumb-item active">分析結果需要時間，請耐心等待</li>
+            <li class="breadcrumb-item active">若沒有出現您的投組，可以稍後再重新整理頁面</li>
+            <li class="breadcrumb-item active">點選ID可以加入該策略的討論</li>
+            <li class="breadcrumb-item active">除競賽排行與個人投組外，最多只顯示200個投組</li>
+            <li class="breadcrumb-item active">競賽排行不分台股與否</li>
+            <li class="breadcrumb-item active">Max Drawdown排行與波動率排行皆排除算不出來的投組</li>
+            <li class="breadcrumb-item active">競賽排行只顯示上月每個人Sharpe ratio最高的投組，且按照Sharpe ratio排行</li>
+        </ol>
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fas fa-table mr-1"></i>分析列表
+                <br/>
+                <br/>
+                <form action="/analysis_result" method="GET" class="form-inline">
+                    <h6>篩選課程/競賽：</h6>
+                    <input type="hidden" id="sortby" name="sortby" value="competition">
+                    <input type="hidden" id="tw" name="tw" value="{{tw}}">
+                    {% include 'competition_select.html' %}
+                    <input type="submit" value="submit" class="btn btn-success" />
+                </form>
+                <br/>
+                <h6>不分課程/競賽：</h6>
+                <a class="btn btn-primary" href="/analysis_result?sortby=default&tw={{tw}}&competition=" role="button">從新到舊排行</a>
+                <a class="btn btn-secondary" href="/analysis_result?sortby=myself&tw={{tw}}&competition=" role="button">只顯示我的投組</a>
+                <a class="btn btn-success" href="/analysis_result?sortby=return&tw={{tw}}&competition=" role="button">依照報酬排行</a>
+                <a class="btn btn-danger" href="/analysis_result?sortby=sharpe&tw={{tw}}&competition=" role="button">依照Sharpe ratio排行</a>
+                <a class="btn btn-warning" href="/analysis_result?sortby=mdd&tw={{tw}}&competition=" role="button">依照Max Drawdown排行</a>
+                <a class="btn btn-info" href="/analysis_result?sortby=vol&tw={{tw}}&competition=" role="button">依照波動率排行</a>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>投組名稱</th>
+                                <th>創建者代號</th>
+                                <th>創建時間</th>
+                                <th>報酬率</th>
+                                <th>Sharpe Ratio</th>
+                                <th>Max Drawdown</th>
+                                <th>波動率</th>
+                            </tr>
+                        </thead>
+                        
+                        <tbody id="result_tbody">
+                            {% for result in results %}
+                                <tr>
+                                    <td><a href="/post_page?post_id={{ result['strategy_id'] }}">{{ result['strategy_id'] }}</a></td>
+                                    <td>{{ result['strategy_name'] }}</td>
+                                    <td>{{ result['author'] | my_substitution }}</td>
+                                    <td>{{ result['create_date'] }}</td>
+                                    <td>{{ '%0.4f' | format(100*result['return']|float) }}%</td>
+                                    <td>{{ '%0.4f' | format(result['sharpe_ratio']|float) }}</td>
+                                    <td>{{ '%0.4f' | format(100*result['max_drawdown']|float) }}%</td>
+                                    <td>{{ '%0.4f' | format(100*result['volatility']|float) }}%</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+{% endblock %}
+

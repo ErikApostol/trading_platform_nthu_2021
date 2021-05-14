@@ -1,0 +1,432 @@
+{% extends "base.html" %}
+
+{% block head %}
+    <link href="{{ url_for('static', filename='css/forum.css') }}" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.min.css">
+    <link rel="stylesheet" href="https://cdn.materialdesignicons.com/3.2.89/css/materialdesignicons.min.css">
+{{ super() }}
+{% endblock %}
+
+
+{% block content %}
+<script type="text/javascript"
+src="https://www.maths.nottingham.ac.uk/plp/pmadw/LaTeXMathML.js">
+</script>
+    <main>
+        <div class="container-fluid">
+            <h1 class="mt-4">首頁</h1>
+            <ol class="breadcrumb mb-4">
+                <li class="breadcrumb-item active">本網站讓使用者可以自建投資組合，回測其績效，並與其他使用者比較、討論並改進。</li>
+                <li class="breadcrumb-item active">使用單位：清華大學、台灣大學、政治大學、明新科大、中華大學、臺北大學、證基會。</li>
+                <!-- <li class="breadcrumb-item active"></li> -->
+            </ol>
+            <div class="card mb-4">
+                <div class="card-header"><i class="fas fa-table mr-1"></i>本擂台說明</div>
+                <div class="card-body">
+                    <p>我們常聽到的「鷄蛋不要放在同個籃子裏」，爲的就是要分散股市不確定性所帶來的風險。一般來説，在風險分散的同時，收益也會跟著降低。於是問題就變成：我們如何在風險與報酬率中取捨。被稱爲資産配置之父的哈利·馬可維兹（Harry Max Markowitz）就提供了以下的想法。</p>
+                    <p>在給定各個標的（underlying）的權重後，對該投資組合（portfolio）做平均數–變異數分析（mean-variance analysis），其中平均數爲平均報酬率，變異數爲波動率（意即「風險」）。在這樣定義不同投資組合的報酬與風險的情况下，我們可以發現：在不同的預期報酬下，都可以找到一個投資組合（或權重）使波動率達到最小值。將這些報酬與對應到的最小風險記錄下來後所形成的開口向右的二維拋物線圖形（如下圖），就是所謂的「效率前緣（efficient frontier）」。</p>
+                    <center><img src="{{ url_for('static', filename='img/Frontier_1.png') }}" width="50%"></img></center>
+                    <p>效率前緣上任一點都代表一組投資組合的風險與報酬。假設無風險利率是0，則每一點與點 (0,1) 的連線的斜率就是該點代表的投資組合的「夏普值」（Sharpe ratio）。 夏普值是一個衡量投資組合績效的相對指標，探討的是報酬與風險的關係——在承受1%的風險下，能得到多少報酬？</p>
+                    <p>本網站使用S&amp;P 500以及元大臺灣50的成份股的歷史日資料。每次計算標的權重，都是取六個月的資料，依照馬可維兹的理論，畫出效率前緣，然後取夏普值最大的權重，再用接下來三個月的資料，觀察投資組合的價值如何變化。我們每三個月更新一次權重，再把許多三個月區間內投資組合的價值變動拼接起來，得到2015年中到2020年中投資組合的價值變動，再藉此求出平均年報酬、年波動率，再把報酬除以波動率得到整個投資期間的夏普值。另外我們還算出最大跌幅（maximum drawdown），就是投資過程中，會從到目前為止的最高點，最多下跌多少幅度。</p>
+                    <p>固定預期報酬$p$，將波動率最小化的數學問題為：$\min_{w}w^{T}Cw$，限制條件為$\sum_{i}w_{i}=1$，$\sum_{i}w_{i}r_{i}=p$，$0\leq w_{i}\leq1 \forall i$，其中$\displaystyle{ A = \left[ w_{1}   w_{2}   \cdots   w_{N} \right]^T } $為權重，$r=[r_{1}  r_{2}  \cdots  r_{N}]^{T}$為投資組合中各個成份標的的平均報酬，$C$為各個成份標的共變異數，$N$為投資組合中有幾個成份標的。
+                    </p>
+                </div>
+            </div>
+            <div class="card mb-4">
+                <div class="card-header"><i class="fas fa-table mr-1"></i>範例投組</div>
+                <div class="card-body">
+                    <div class="accordion" id="accordionExample">
+                        <div class="card">
+                            <div class="card-header" id="headingOne">
+                                <h2 class="mb-0">
+                                    <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                                        投組#1 日用品投組
+                                    </button>
+                                </h2>
+                            </div>
+
+                            <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordionExample">
+                                <div class="card-body">
+                                    <h3>想法與評論</h3>
+                                    <p>
+                                        這次的目標是使 2006~2018 歷史年化報酬率「不為負」，而要使每年的報酬率皆不為負，作者認為最大的困難在於要避開 2008 年金融海嘯為股市帶來的大幅虧損。
+                                    </p>
+                                    <p>
+                                        2008 年全球股災的經濟危機造成百業蕭條、許多建設停擺，然而，縱使景氣不佳，人民還是要購買生 活用品、喝飲料、看影集，因此作者以「日常生活」相關類股為主軸，選擇美國的「一美元商店」連鎖零 售店“Dollar Tree”，可口可樂入股的飲料公司“Monster Beverage”，以及電視電影的大佬 “Netflix”。這些非常貼近百姓生活的公司，在全球股災中的受挫相對較少。 另外，組合中有 “American Express Company”，它除了提供的服務與日常生活也相關之外，更是作者的偶像巴菲特大 量持有的股票，它長年的報酬率表現皆優於大盤，故選入。
+                                    </p>
+                                    <h3>成份比重</h3>
+                                    <p class="tags-content text-center">
+                                        <p class="text-content text-center">
+                                            <a class="tag  is-primary" href="">
+                                                NFLX 32.63%
+                                            </a>
+                                            <a class="tag  is-success" href="">
+                                                AXP 28.93%
+                                            </a>
+                                            <a class="tag  is-danger" href="">
+                                                MNST 22.39%
+                                            </a>
+                                            <a class="tag  is-link" href="">
+                                                DLTR 16.04%
+                                            </a>
+                                        </p>
+                                    </p>
+                                    <h3>績效</h3>
+                                    <table class="center table">
+                                        <thead>
+                                            <tr>
+                                                <th>年報酬</th>
+                                                <th>波動率</th>
+                                                <th>夏普比率</th>
+                                                <th>最大跌幅</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>25.07%</td>
+                                                <td>25.20%</td>
+                                                <td>0.99</td>
+                                                <td>39.96%</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <img src="{{ url_for('static', filename='img/307198.jpg') }}" width="80%" class="center" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header" id="headingTwo">
+                                <h2 class="mb-0">
+                                    <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                        投組#2
+                                    </button>
+                                </h2>
+                            </div>
+                            <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionExample">
+                                <div class="card-body">
+                                    <h3>投資標的(15檔)</h3>
+                                    <ul>
+                                        <li style="display:list-item; list-style-type:disc; margin-left:2em;">
+                                            科技、人工智慧、半導體<br/>
+                                            Facebook、Google、NVIDIA、Square、AVGO(博通)、Intel、Amazon
+                                        </li>
+                                        <li style="display:list-item; list-style-type:disc; margin-left:2em;">
+                                            全球資產配置<br/>
+                                            20年期以上美國公債ETF、美國中期債券ETF、美國市政債券ETF、投資等級公司債券ETF、標普500指數ETF、黃金信託ETF
+                                        </li>
+                                        <li style="display:list-item; list-style-type:disc; margin-left:2em;">
+                                            能源<br/>
+                                            First Solar(太陽能)
+                                        </li>
+                                        <li style="display:list-item; list-style-type:disc; margin-left:2em;">
+                                            社會責任<br/>
+                                            SHE(SPDR道富高層主管性別多樣性指數ETF)
+                                        </li>
+                                    </ul>
+                                    <h3>績效</h3>
+                                    <table class="center table">
+                                        <thead>
+                                            <tr>
+                                                <th>年報酬</th>
+                                                <th>波動率</th>
+                                                <th>夏普比率</th>
+                                                <th>最大跌幅</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>17.42%</td>
+                                                <td>13.45%</td>
+                                                <td>1.3</td>
+                                                <td>27.38%</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <img src="{{ url_for('static', filename='img/example_portfolio2-1.jpg') }}" width="80%" class="center" />
+                                    <img src="{{ url_for('static', filename='img/example_portfolio2-2.jpg') }}" width="80%" class="center" />
+                                    <img src="{{ url_for('static', filename='img/example_portfolio2-3.jpg') }}" width="80%" class="center" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header" id="headingThree">
+                                <h2 class="mb-0">
+                                    <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                        投組#3
+                                    </button>
+                                </h2>
+                            </div>
+                            <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#accordionExample">
+                                <div class="card-body">
+                                    <h3>想法與評論</h3>
+                                    <p>
+                                        作者只是嘗試將夏普值目標訂在1.5以上, 並儘可能降低波動與最大跌幅, 試驗數次組合後的結果<br/>
+                                        但其實與作者原本設想的投組有些差距,包括: 高收債ETF, 特別股ETF 等, 原先作者認知可提高穩定收益或增加投資效率的部位, 由系統動態調整配置後的歷史測試結果並不佳<br/>
+                                         
+                                        反倒是因為加入少數幾檔過去表現佳的趨勢個股, 讓整體測試結果有不錯的表現 (如果是藉由美科技股ETF, 或是再增加多檔個股的分散投資,無法組成更好的歷史夏普值結果)<br/>
+                                        但就像網站警語所顯示,<br/>
+                                        “看似您選到了幾隻表現很好的股票喔.請小心的是這些股票在未來可能不會有如此爆炸性的成長.但也別擔心,奇果會根據您給定的這些標的,密切監控並作適當的配置,調整,讓投組能保有穩定的成長.”<br/>
+                                        老實說, 作者對這樣的模擬投組與未來實際投資成效,有些存疑. 這是先大略知道歷史績效後所拚湊出的模擬投組, 不代表未來趨勢與股價仍可持續表現.<br/>
+                                        作者對投資市場並不在行, 過去只有不認真買基金的經驗.<br/>
+                                        這個投組, 達六成的股票部位只投資三檔個股, 作為長期投資,會讓作者有些睡不著 (作者的風險屬性設定在中高)
+                                    </p>
+                                    <h3>成份比重</h3>
+                                    <p class="tags-content text-center">
+                                        <p class="text-content text-center">
+                                            <a class="tag  is-light" href="">
+                                                V 32.25%
+                                            </a>
+                                            <a class="tag  is-primary" href="">
+                                                APPL 16.03%
+                                            </a>
+                                            <a class="tag  is-success" href="">
+                                                AMZN 15.67%
+                                            </a>
+                                            <a class="tag  is-danger" href="">
+                                                EMB 16.05%
+                                            </a>
+                                            <a class="tag  is-dark" href="">
+                                                LQD 5.01%
+                                            </a>
+                                            <a class="tag  is-link" href="">
+                                                BIV 5.00%
+                                            </a>
+                                            <a class="tag  is-info" href="">
+                                                TLT 5.00%
+                                            </a>
+                                            <a class="tag  is-warning" href="">
+                                                GLD 5.00%
+                                            </a>
+                                        </p>
+                                    </p>
+                                    <h3>績效</h3>
+                                    <table class="center table">
+                                        <thead>
+                                            <tr>
+                                                <th>年報酬</th>
+                                                <th>波動率</th>
+                                                <th>夏普比率</th>
+                                                <th>最大跌幅</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>19.27%</td>
+                                                <td>12.04%</td>
+                                                <td>1.6</td>
+                                                <td>14.47%</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <img src="{{ url_for('static', filename='img/307175.jpg') }}" width="80%" class="center" />
+                                    <img src="{{ url_for('static', filename='img/307176.jpg') }}" width="80%" class="center" />
+                                    <img src="{{ url_for('static', filename='img/307177.jpg') }}" width="80%" class="center" />
+                                    <img src="{{ url_for('static', filename='img/307179.jpg') }}" width="80%" class="center" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header" id="headingFour">
+                                <h2 class="mb-0">
+                                    <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+                                        投組#4
+                                    </button>
+                                </h2>
+                            </div>
+
+                            <div id="collapseFour" class="collapse" aria-labelledby="headingFour" data-parent="#accordionExample">
+                                <div class="card-body">
+                                    <h3>想法與評論</h3>
+                                    <p>
+                                        一開始作者是以個股及TLT和BIV這兩個債券組合做搭配，後來加入IAU這個持有實體黃金的ETF，也組合出報酬率13%左右、Sharp值超越1.35的組合，當然波動度及最大跌幅也稍微增加一些，但整體績效作者認為是可行的，最後選擇這個組合，主要是因為以下幾個想法：
+                                    </p>
+                                    <ol>
+                                        <li style="display:list-item; list-style-type:decimal; margin-left:2em;"> 
+                                            不選擇個股<br/>
+                                            作者認為以個股的狀況來說，現在的報酬不等於未來的報酬，當然有些研究論文中可以看出，企業社會責任表現較佳的公司，長期報酬是比較優異的，但作者認為挑選個股是很花費時間心力，且很困難的，以資產配置的角度來看，與其選擇個股，不如選擇持有個股的ETF。
+                                        </li>
+                                        <li style="display:list-item; list-style-type:decimal; margin-left:2em;"> 
+                                            組合中納入IAU<br/>
+                                            以作者的觀念裡面，持有黃金不算很好的投資(因為實體黃金不產生收益)，後來實際測試和研究後，發現IAU其實年化報酬接近有8%，且可以有效降低股債市場震盪時，整體投資組合的波動度，所以雖然和自己認知的觀念不太合，還是選擇將IAU納入整體投資組合。
+                                        </li>
+                                        <li style="display:list-item; list-style-type:decimal; margin-left:2em;"> 
+                                            選擇QQQ及XLK<br/>
+                                            確定捨棄個股，選擇股票ETF作為股權配置後，作者先研究了可以選擇的ETF長期的報酬，後來保留QQQ、XLK及SMH，在經過測試排列組合後，並參考三檔ETF的持股明細後，選擇了QQQ及XLK這個組合，其實只選擇QQQ的報酬是更高的，但波動度及最大跌幅都會增加，後來以最大下跌幅度低於15%為一個標準，選擇這個組合，剛好這兩個組合中持有的股票也是美股中相對報酬較好的大型公司及科技股。
+                                        </li>
+                                        <li style="display:list-item; list-style-type:decimal; margin-left:2em;"> 
+                                            建議和想法
+                                            <ol>
+                                                <li style="display:list-item; list-style-type:lower-roman; margin-left:2em;"> 
+                                                    實際操作後，發現能夠選擇的ETF不太多，尤其股權相關的ETF，又以科技相關為主，美股中科技股報酬雖然亮眼，但波動也相對較大，如果能選擇一些公用事業，或是民生產業的組合，或許可以取得更理想的報酬和更低的低動度。
+                                                </li>
+                                                <li style="display:list-item; list-style-type:lower-roman; margin-left:2em;"> 
+                                                    實際操作後發現，以選擇個股ETF來說，選擇的ETF檔數越多，報酬及波動度反而越不理想，作者認為是因為ETF本質上就是一籃子股票，如此一來，籃子內的股票越質量越高，報酬自然比較好，所以與其選擇持有前500強公司的股票ETF，不如選擇持有前100強公司的股票ETF。
+                                                </li>
+                                            </ol>
+                                        </li>
+                                    </ol>
+                                    <p>
+                                    </p>
+                                    <h3>成份比重</h3>
+                                    <p class="tags-content text-center">
+                                        <p class="text-content text-center">
+                                            <a class="tag  is-primary" href="">
+                                                BIV 35.00%
+                                            </a>
+                                            <a class="tag  is-success" href="">
+                                                TLT 22.57%
+                                            </a>
+                                            <a class="tag  is-danger" href="">
+                                                IAU 24.46%
+                                            </a>
+                                            <a class="tag  is-warning" href="">
+                                                QQQ 12.97%
+                                            </a>
+                                            <a class="tag  is-link" href="">
+                                                XLK 5.00%
+                                            </a>
+                                        </p>
+                                    </p>
+                                    <h3>績效</h3>
+                                    <table class="center table">
+                                        <thead>
+                                            <tr>
+                                                <th>年報酬</th>
+                                                <th>波動率</th>
+                                                <th>夏普比率</th>
+                                                <th>最大跌幅</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>9.81%</td>
+                                                <td>7.28%</td>
+                                                <td>1.35</td>
+                                                <td>14.65%</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <img src="{{ url_for('static', filename='img/Screenshot from 2020-06-26 15-49-12.png') }}" width="80%" class="center" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header" id="headingFive">
+                                <h2 class="mb-0">
+                                    <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapseFive" aria-expanded="false" aria-controls="collapseFive">
+                                        投組#5
+                                    </button>
+                                </h2>
+                            </div>
+
+                            <div id="collapseFive" class="collapse" aria-labelledby="headingFive" data-parent="#accordionExample">
+                                <div class="card-body">
+                                    <h3>想法與評論</h3>
+                                    <p>
+                                        以下為作者自建的投資組合, 整個選股核心思想就是「穩健的長期投資」，所以風險分數選擇「低」，並且在選擇主題時，第一選擇就是社會責任，因為作者一向認為願意負擔社會責任的公司體質最穩健，這類公司不僅能照顧好客戶、員工、股東，還有餘力照顧社會大眾。再來就是選擇作者最看好的未來產業「人工智慧」，因為它未來的發展真的已經到了水到渠成的境界，所謂大象在風口上都會飛起來。接著選擇作者自己最熟悉的半導體產業，當然也包括車用電子這塊(電動車、自駕車)。最後全球資產配置的部分，對作者而言，有點像似避險，因為前面都是作者自己選，當然要選不同類型的ETF來補足。
+                                    </p>
+                                    <p>
+                                        至於在各個主題下的個股，作者的挑選原則很簡單，就是挑產業龍頭或是特定領域的領先者，又因為龍頭或領先者通常不會是小型股，所以作者挑了Vanguard小型股ETF來做平衡，而iShare 20年期以上美國公債ETF和iShare黃金信託ETF真的就是怕股市崩盤，所以選兩個和股市負相關的ETF。經過TradingValley測試，相關績效與歷史年化報酬率如附圖。
+                                    </p>
+                                    <p>
+                                        由TradingVlley的測試結果可以看出作者的投資組合沒有一項指標特別突出，但是相當穩健。除非是遇到2008年的金融海嘯或是2020年的武漢肺炎，否則歷史年化報酬率都能維持在正值，股市大好時可以賺30%左右，行情普通時也可以賺15%左右。雖然作者還可以追求更高的平均年化報酬率，但是考量自己想要的穩健，也就是最大降幅盡量不要超過25%和波動度盡量不要超過12.5%，所以作者還是決定這樣的投資組合最適合自己。
+                                    </p>
+                                    <h3>成份比重</h3>
+                                    <p class="tags-content text-center">
+                                        <p class="text-content text-center">
+                                            <span class="tag is-black">Microsoft Corporation
+                                            5.00%
+                                            </span>
+                                            <span class="tag is-dark">Pfizer Inc.
+                                            5.03%
+                                            </span>
+                                            <span class="tag is-light">Verizon Communication Inc.
+                                            22.98%
+                                            </span>
+                                            <span class="tag is-white">Advanced Micro Devices, Inc.
+                                            5.00%
+                                            </span>
+                                            <span class="tag is-primary">Amazon.com, Inc.
+                                            5.00%
+                                            </span>
+                                            <span class="tag is-link">Facebook Inc
+                                            5.00%
+                                            </span>
+                                            <span class="tag is-info">Alphabet Inc
+                                            5.00%
+                                            </span>
+                                            <span class="tag is-success">Taiwan Semiconductor Mfg. Co. Ltd. (ADR)
+                                            5.00%
+                                            </span>
+                                            <span class="tag is-warning">NVIDIA Corporation
+                                            5.00%
+                                            </span>
+                                            <span class="tag is-danger">Tesla Motors Inc
+                                            5.00%
+                                            </span>
+                                            <span class="tag is-black">Vanguard小型股ETF
+                                            9.02%
+                                            </span>
+                                            <span class="tag is-dark">iShare 20年期以上美國公債ETF
+                                            13.97%
+                                            </span>
+                                            <span class="tag is-light">iShare黃金信託ETF
+                                            8.99%
+                                            </span>
+                                        </p>
+                                    </p>
+                                    <h3>績效</h3>
+                                    <table class="center table">
+                                        <thead>
+                                            <tr>
+                                                <th>年報酬</th>
+                                                <th>波動率</th>
+                                                <th>夏普比率</th>
+                                                <th>最大跌幅</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>16.72%</td>
+                                                <td>12.15%</td>
+                                                <td>1.38</td>
+                                                <td>24.81%</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <img src="{{ url_for('static', filename='img/example_portfolio5.png') }}" width="80%" class="center" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card mb-4">
+                <div class="card-header"><i class="fas fa-table mr-1"></i>歷次修訂紀錄</div>
+                <div class="card-body">
+                    <p>Jul 31, 2020: 輸入資產代碼時，旁邊顯示資產完整名稱</p>
+                    <p>Aug 03, 2020: 加入臺灣50指數成份股資料</p>
+                    <p>Sep 18, 2020: 在首頁下方列出所有資產；送出投組後顯示提示對話框</p>
+                    <p>Sep 23, 2020: 將使用者email地址@之後的部份隱去</p>
+                    <p>Sep 24, 2020: 修正權重與資產順序不一致的錯誤</p>
+                    <p>Sep 27, 2020: 加入加密貨幣資料</p>
+                    <p>Oct 02, 2020: 將資產權重限制在0.03到0.5之間</p>
+                    <p>Nov 08, 2020: 讓無法畫出馬可維茲邊界的組合，仍可以在分析結果排行中留下記錄</p>
+                    <p>Nov 30, 2020: 將台股分出另外頁面</p>
+                    <p>Dec 02, 2020: 新增月排行</p>
+                    <p>Dec 10, 2020: 新增停權機制</p>
+                    <p>Dec 15, 2020: 台股與美股建立策略共用同一個template與view function; 新增競賽排行</p>
+                    <p>Jan 16, 2021: 增加每季報酬柱狀圖；投組建立時間精確到微秒</p>
+                    <p>Feb 18, 2021: 允許投組只有兩個資產</p>
+                    <p>Feb 24, 2021: 允許自行上傳資料</p>
+                    <p>Feb 24, 2021: 將未結束競賽的結果隱藏</p>
+                    <p>Feb 25, 2021: 分析成功完成的flash訊息加入分析結果連結</p>
+                    <p>Mar 15, 2021: 資料庫改用PostgreSQL</p>
+
+                    <p></p>
+                </div>
+            </div>
+        </div>
+    </main>
+{% endblock %}
+

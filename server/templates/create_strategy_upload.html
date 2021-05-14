@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+<div id="layoutAuthentication">
+    <div id="layoutAuthentication_content">
+        <main>
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-lg-5">
+                        {% if tw=='false' %}
+                        <br/>
+                        <ol class="breadcrumb mb-4">
+                            <!-- <li class="breadcrumb-item active"></li> -->
+                            <li class="breadcrumb-item active">每兩次建立策略須間隔30秒，間隔時間少於30秒系統不會進行分析</li>
+                        </ol>
+                        {% endif %}
+                        <div class="card shadow-lg border-0 rounded-lg mt-5">
+                            <div class="card-header"><h3 class="text-center font-weight-light my-4">自行上傳資料並建立策略</h3></div>
+                            <div class="card-body">
+                                <form action="/create_strategy_upload" method="POST" class="form-horizontal" enctype="multipart/form-data">
+                                    <div class="form-group">
+                                        <h4>為你的投組取一個名字：</h4>
+                                        <input type="text" name="strategy_name" id="strategy_name" placeholder="例如：絕對無敵投資王" />
+                                    </div>
+
+                                    <div class="form-group" id="items">
+                                        <h4>請上傳資料：</h4>
+                                        <h5>資料格式：</h5>
+                                        <ol>
+                                            <li>限上傳csv檔</li>
+                                            <li>第一列為Date（注意大小寫），之後接各個資產代碼</li>
+                                            <li>第二列以後除日期外皆為資產價格</li>
+                                            <li>日期格式為年份四碼-月份二碼-日期二碼，如2021-02-23</li>
+                                        </ol>
+                                        <h5>範例：</h5>
+                                        <img src="{{ url_for('static', filename='img/Screenshot from 2021-02-23 23-29-06.png') }}" width="100%" />
+                                        <div class="form-group">
+                                            <input type="file" name="fileToUpload" id="fileToUpload">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <h4>您所參加的課程/競賽：</h4>
+                                        {% include 'competition_select.html' %}
+                                    </div>
+                                    <input type="hidden" id="tw" name="tw" value="{{ tw }}">
+
+                                    <div class="form-group">
+                                        <input type="submit" value="submit" class="btn btn-success" onclick="return confirm('按下「OK/是/確定」之後，您的投組就立即送出。您可以離開或關閉這個頁面，分析程式會繼續執行。但是請不要重複按「Submit」按鈕。')"/>
+                                    </div>
+                                </form>
+                                <script src="{{ url_for('static', filename='js/jquery-3.5.1.min.js') }}"></script>
+                                
+                            </div>
+                            <div class="card-footer text-center">
+                                <div class="small"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+</div>
+</div>
+{% endblock %}

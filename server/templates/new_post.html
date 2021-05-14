@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block content %}
+<script src="{{ url_for('static', filename='js/upload_file.js') }}"></script>
+<div id="layoutAuthentication">
+    <div id="layoutAuthentication_content">
+        <main>
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-lg-7">
+                        <div class="card shadow-lg border-0 rounded-lg mt-5">
+                            <div class="card-header"><h3 class="text-center font-weight-light my-4">新增貼文</h3></div>
+                            <div class="card-body">
+                                <form enctype="application/json">
+                                    <div class="form-group">
+                                        <p>標題
+                                            <input class="form-control" id="title" name="title">
+
+                                        </input>
+                                        </p>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <p>評論
+                                            <textarea class="form-control" id="comment" name="comment">
+
+                                            </textarea>
+                                        </p>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <p>影片id
+                                            <select class="form-control" id="video_id" name="object_hit">
+                                            </select>
+                                        </p>
+                                    </div>
+                                        
+                                    <button class="btn btn-primary btn-block" onclick="post_comment()">送出</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+    <script src="{{ url_for('static', filename='js/new_post.js') }}"></script>
+{% endblock %}

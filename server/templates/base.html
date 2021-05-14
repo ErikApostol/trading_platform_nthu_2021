@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        {% block head %}
+        {% endblock %}
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="" />
+        <meta name="author" content="" />
+        <title>NTHU 投資組合大擂台</title>
+        <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet" />
+        <link href="https://cdn.datatables.net/1.10.20/css/dataTables.bootstrap4.min.css" rel="stylesheet" crossorigin="anonymous" />
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/js/all.min.js" crossorigin="anonymous"></script>
+    </head>
+    <body class="sb-nav-fixed">
+        <nav class="sb-topnav navbar navbar-expand navbar-light" style="background-color: #ffb3b3;">
+            <a class="navbar-brand" href="/">投資組合大擂台</a>
+            <button class="btn btn-link btn-sm order-1 order-lg-0" id="sidebarToggle" href="#"><i class="fas fa-bars"></i></button>
+            {% include '_messages.html' %}
+            <!-- Navbar Search-->
+            <form class="d-none d-md-inline-block form-inline ml-auto mr-0 mr-md-3 my-2 my-md-0" method="GET" action="/forum/filter">
+                <!-- <div class="input-group">
+                    <input class="form-control" name="filter" type="text" placeholder="Search for..." />
+                    <div class="input-group-append">
+                        <button class="btn btn-primary"><i class="fas fa-search"></i></button>
+                    </div>
+                </div> -->
+            </form>
+            <!-- Navbar-->
+            <ul class="navbar-nav ml-auto ml-md-0">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" id="userDropdown" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fas fa-user fa-fw"></i></a>
+                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown">
+                        {% if session.USERNAME %}
+                        <a class="dropdown-item" id="login_logout" href="/logout">Logout</a>
+                        {% else %}
+                        <a class="dropdown-item" id="login_logout" href="/login">Login</a>
+                        {% endif %}
+                </li>
+            </ul>
+        </nav>
+        <div id="layoutSidenav">
+            <div id="layoutSidenav_nav">
+                <nav class="sb-sidenav accordion sb-sidenav-dark" style="background-color: #ff8080;" id="sidenavAccordion">
+                    <div class="sb-sidenav-menu">
+                        <div class="nav">
+                            
+                            <a class="nav-link" href="/">
+                                <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt" style="font-size:2em;"></i></div>
+                                首頁
+                            </a>
+
+                            <a class="nav-link" href="/create_strategy?tw=false">
+                                <div class="sb-nav-link-icon"><i class="fas fa-chess" style="font-size:2em;"></i></div>
+                                建立策略
+                            </a>
+                            
+                            <a class="nav-link" href="/create_strategy_upload">
+                                <div class="sb-nav-link-icon"><i class="fas fa-chess" style="font-size:2em;"></i></div>
+                                自行上傳資料並建立策略
+                            </a>
+                            
+                            <a class="nav-link" href="/analysis_result?sortby=default&tw=false&competition=none">
+                                <div class="sb-nav-link-icon"><i class="fas fa-list-ol" style="font-size:2em;"></i></div>
+                                分析結果排行
+                            </a>
+
+                            <a class="nav-link" href="/create_strategy?tw=true">
+                                <div class="sb-nav-link-icon"><i class="fas fa-chess" style="font-size:2em;"></i></div>
+                                台股建立策略
+                            </a>
+                            
+                            <a class="nav-link" href="/analysis_result?sortby=default&tw=true&competition=none">
+                                <div class="sb-nav-link-icon"><i class="fas fa-list-ol" style="font-size:2em;"></i></div>
+                                台股分析結果排行
+                            </a>
+
+                            <a class="nav-link" href="/forum">
+                                <div class="sb-nav-link-icon"><i class="fas fa-comments" style="font-size:2em;"></i></div>
+                                討論區
+                            </a>
+
+                        </div>
+                    </div>
+                    <div class="sb-sidenav-footer" style="background-color: #0067ff;">
+                        <div class="small" id="login_status">Logged in as:</div>
+                        <a id="username">{{session.USERNAME}}</a>
+                    </div>
+                </nav>
+            </div>
+            <div id="layoutSidenav_content">
+                {% block content %}
+                {% endblock %}
+            <footer class="py-4 bg-light mt-auto">
+                    <div class="container-fluid">
+                        <div class="d-flex align-items-center justify-content-between small">
+                            <div class="text-muted">Revised and maintained by Erik Apostol.</div>
+                        </div>
+                    </div>
+                </footer>
+            </div>
+        </div>
+        <script src="{{ url_for('static', filename='js/base.js') }}"></script>
+        <script src="https://code.jquery.com/jquery-3.4.1.min.js" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+        <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js" crossorigin="anonymous"></script>
+        <script src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js" crossorigin="anonymous"></script>
+        <script src="https://cdn.datatables.net/1.10.20/js/dataTables.bootstrap4.min.js" crossorigin="anonymous"></script>
+        
+        {% block script %}
+        {% endblock %}
+    </body>
+</html>

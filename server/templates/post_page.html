@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block head %}
+    <link href="{{ url_for('static', filename='css/forum.css') }}" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.min.css">
+    <link rel="stylesheet" href="https://cdn.materialdesignicons.com/3.2.89/css/materialdesignicons.min.css">
+{% endblock %}
+
+{% block content %}
+<div id="layoutAuthentication">
+    <div id="layoutAuthentication_content">
+        <main>
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-lg-7">
+                        <div class="">
+                            <div class="">
+                                <p class="text-content text-center font-weight-light my-4">
+                                    {{ data['strategy_content']['strategy_name'] }} created by {{ data['strategy_content']['author'] | my_substitution }}
+                                    <span class="solved" title="Solved">
+                                        <i class="mdi mdi-checkbox-marked-circle"></i>
+                                    </span>
+                                </p>
+                                <p class="tags-content text-center">
+                                    <p class="text-content text-center">
+                                        <a class="tag is-rounded is-warning" href="/forum/filter?filter={{ data['strategy_content']['create_date'] }}">
+                                            {{ data['strategy_content']['create_date'] }}
+                                        </a>
+                                    </p>
+                                </p>
+                            </div>
+
+                            <div class="card-body">
+                                <form>
+                                    <div class="box forum">
+                                        <article class="media">
+                                            <div class="media-content">
+                                                <div class="content list-forum">
+                                                    <h2>
+                                                        資產比重：
+                                                    </h2>
+                                                    <ul>
+                                                        {% for ticker in data['asset_content'] %}
+                                                            <li class="text-content font-weight-light">
+                                                                {{ ticker['asset_ticker'] }}: {{ '%0.4f' | format(100*ticker['weight']|float) }}%
+                                                            </li>
+                                                        {% endfor %}
+                                                    </ul>
+                                                    <h2>
+                                                        投組表現：
+                                                    </h2>
+                                                    <ul>
+                                                        <li class="text-content font-weight-light">
+                                                            年報酬率：{{ '%0.4f' | format(100*data['strategy_content']['return']|float) }}%
+                                                        </li>
+                                                        <li class="text-content font-weight-light">
+                                                            Sharpe ratio：{{ '%0.4f' | format(data['strategy_content']['sharpe_ratio']|float) }}
+                                                        </li>
+                                                        <li class="text-content font-weight-light">
+                                                            Maximum Drawdown：{{ '%0.4f' | format(100*data['strategy_content']['max_drawdown']|float) }}%
+                                                        </li>
+                                                        <li class="text-content font-weight-light">
+                                                            波動率：{{ '%0.4f' | format(100*data['strategy_content']['volatility']|float) }}%
+                                                        </li>
+                                                    </ul>
+                                                    <h2>
+                                                        若資產比重與投組表現全為0，表示無資料或此投資組合無法畫出馬可維茲邊界。
+                                                    </h2>
+                                                </div>
+                                            </div>
+                                        </article>
+                                    </div>
+                                </form>
+
+                                <form>
+                                    <div class="box forum">
+                                        <article class="media">
+                                            <div class="media-content">
+                                                <div class="content list-forum">
+                                                    <h2>投資組合價值變化（2015/07/01 = 100）</h2>
+                                                    <img id="chart" width="480" height="300" class="center" src="{{ url_for('static', filename='img/portfolio_values/'+strategy_id+'.png') }}"/>
+                                                </div>
+                                            </div>
+                                        </article>
+                                    </div>
+                                    <div class="box forum">
+                                        <article class="media">
+                                            <div class="media-content">
+                                                <div class="content list-forum">
+                                                    <h2>投資組合每季報酬率（2015Q3起）</h2>
+                                                    <img id="chart" width="480" height="300" class="center" src="{{ url_for('static', filename='img/quarterly_returns/'+strategy_id+'.png') }}"/>
+                                                </div>
+                                            </div>
+                                        </article>
+                                    </div>
+                                </form>
+
+                                <form action="/comment" method="POST">
+                                    <div class="box forum">
+                                        <article class="media">
+                                            <div class="media-content">
+                                                <div class="content list-forum">
+                                                    <div class="form-group">
+                                                        <p>評論
+                                                            <textarea class="form-control" id="comment" name="comment"></textarea>
+                                                        </p>
+                                                    </div>
+                                                    <input type="hidden" id="strategy_id" name="strategy_id" value="{{ data['strategy_content']['strategy_id'] }}">
+                                                    <button type="submit" class="btn btn-primary">送出</button>
+                                                </div>
+                                            </div>
+                                        </article>
+                                    </div>
+                                </form>
+                                {% for i in range(0, data['comment_count']) %}
+                                    <form>
+                                        <div class="box forum">
+                                            <article class="media">
+                                                <div class="media-content">
+                                                    <div class="content list-forum">
+                                                        <p class="text-content font-weight-light">
+                                                            ＃{{ i+1 }} post by {{ data['comment_content'][i]['author'] }}
+                                                            <a class="tag is-rounded is-warning" href="/forum/filter?filter={{ data['comment_content'][i]['date'] }}">
+                                                                {{ data['comment_content'][i]['date'] }}
+                                                            </a>
+                                                        </p>
+                                                        <p class="text-content">
+                                                            {{ data['comment_content'][i]['comment'] }}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </article>
+                                        </div>
+                                    </form>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+    <script src="{{ url_for('static', filename='js/forum.js') }}"></script>
+{% endblock %}
