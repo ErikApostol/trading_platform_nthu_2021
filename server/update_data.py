@@ -22,3 +22,5 @@ for ticker in tickers:
     time.sleep(random.uniform(10,20))
 
 all_data.to_csv(data_file_to_update, index=False, columns=['Date','Ticker','Open','High','Low','Close','Adj Close','Volume'])
+
+# Remember to modify start_dates in main.py

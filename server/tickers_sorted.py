@@ -446,6 +446,7 @@ asset_candidates =  [
 ('TROW', 'T. Rowe Price Group, Inc.'),
 ('TRV', 'The Travelers Companies, Inc.'),
 ('TSCO', 'Tractor Supply Company'),
+('TSLA', 'Tesla Inc.'),
 ('TSN', 'Tyson Foods, Inc.'),
 ('TT', 'Trane Technologies plc'),
 ('TTWO', 'Take-Two Interactive Software, Inc.'),

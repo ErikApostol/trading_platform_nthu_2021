@@ -39,13 +39,37 @@
                                                     <h2>
                                                         資產比重：
                                                     </h2>
-                                                    <ul>
-                                                        {% for ticker in data['asset_content'] %}
-                                                            <li class="text-content font-weight-light">
-                                                                {{ ticker['asset_ticker'] }}: {{ '%0.4f' | format(100*ticker['weight']|float) }}%
-                                                            </li>
-                                                        {% endfor %}
-                                                    </ul>
+                                                    <table class="table">
+                                                        <thead>
+                                                            <tr>
+                                                                <th class="has-text-centered">股票代碼</th>
+                                                                <th class="has-text-centered">股票名稱</th>
+                                                                <th class="has-text-centered">資產比重</th>
+                                                                <th class="has-text-centered">目前股價</th> 
+                                                        </thead>
+                                                        <tbody>
+                                                            {% for ticker in data['asset_content'] %}
+                                                            <tr>
+                                                                <td class="has-text-centered"> {{ ticker['asset_ticker'] }} </td>
+                                                                <td class="has-text-centered"> 
+                                                                    {% if ticker['asset_ticker'] in data['asset_candidates'] %}
+                                                                    {{ data['asset_candidates'][ticker['asset_ticker']] }}
+                                                                    {% else %}
+                                                                    N/A
+                                                                    {% endif %}
+                                                                </td>
+                                                                <td class="has-text-centered"> {{ '%0.4f' | format(100 * ticker['weight'] | float) }} </td>
+                                                                <td class="has-text-centered"> 
+                                                                    {% if ticker['asset_ticker'] in data['all_trading_data'] %}
+                                                                    {{ '%0.2f' | format(data['all_trading_data'][ticker['asset_ticker']] | float) }} 
+                                                                    {% else %}
+                                                                    N/A
+                                                                    {% endif %}
+                                                                </td>
+                                                            </tr>
+                                                            {% endfor %}
+                                                        </tbody>
+                                                    </table> 
                                                     <h2>
                                                         投組表現：
                                                     </h2>
@@ -61,6 +85,9 @@
                                                         </li>
                                                         <li class="text-content font-weight-light">
                                                             波動率：{{ '%0.4f' | format(100*data['strategy_content']['volatility']|float) }}%
+                                                        </li>
+                                                        <li class="text-content font-weight-light">
+                                                            10日VaR：{{ '%0.4f' | format(data['strategy_content']['ten_day_var']|float) }}
                                                         </li>
                                                     </ul>
                                                     <h2>

@@ -17,12 +17,18 @@ src="https://www.maths.nottingham.ac.uk/plp/pmadw/LaTeXMathML.js">
             <h1 class="mt-4">首頁</h1>
             <ol class="breadcrumb mb-4">
                 <li class="breadcrumb-item active">本網站讓使用者可以自建投資組合，回測其績效，並與其他使用者比較、討論並改進。</li>
-                <li class="breadcrumb-item active">使用單位：清華大學、台灣大學、政治大學、明新科大、中華大學、臺北大學、證基會。</li>
+                <li class="breadcrumb-item active">使用單位：清華大學、台灣大學、政治大學、明新科大、中華大學、臺北大學、證基會、成功大學。</li>
                 <!-- <li class="breadcrumb-item active"></li> -->
             </ol>
             <div class="card mb-4">
                 <div class="card-header"><i class="fas fa-table mr-1"></i>本擂台說明</div>
                 <div class="card-body">
+                    <center>
+                        <video width="70%" controls>
+                        <source src="{{ url_for('static', filename='video/投資組合大擂台簡介-2021-05-20_17.47.04.webm') }}" type="video/webm">
+                        <source src="{{ url_for('static', filename='video/投資組合大擂台簡介-2021-05-20_17.47.04.mp4') }}" type="video/mp4">
+                        </video>
+                    </center>
                     <p>我們常聽到的「鷄蛋不要放在同個籃子裏」，爲的就是要分散股市不確定性所帶來的風險。一般來説，在風險分散的同時，收益也會跟著降低。於是問題就變成：我們如何在風險與報酬率中取捨。被稱爲資産配置之父的哈利·馬可維兹（Harry Max Markowitz）就提供了以下的想法。</p>
                     <p>在給定各個標的（underlying）的權重後，對該投資組合（portfolio）做平均數–變異數分析（mean-variance analysis），其中平均數爲平均報酬率，變異數爲波動率（意即「風險」）。在這樣定義不同投資組合的報酬與風險的情况下，我們可以發現：在不同的預期報酬下，都可以找到一個投資組合（或權重）使波動率達到最小值。將這些報酬與對應到的最小風險記錄下來後所形成的開口向右的二維拋物線圖形（如下圖），就是所謂的「效率前緣（efficient frontier）」。</p>
                     <center><img src="{{ url_for('static', filename='img/Frontier_1.png') }}" width="50%"></img></center>

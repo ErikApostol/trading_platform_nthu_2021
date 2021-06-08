@@ -10,6 +10,7 @@ import os
 import pytz
 import re
 import time
+import json
 import psycopg2
 import psycopg2.extras
 from tickers_sorted import *
@@ -54,6 +55,15 @@ confidential_competitions_placeholder = ', '.join(['%s']*len(confidential_compet
 @main.template_filter('my_substitution')
 def my_substitution(string):
     return re.sub(r'@[a-zA-Z0-9_\-\.]+', r'', string)
+
+def ten_day_VaR(portfolio_value):
+    # 95% z value = 1.645
+    z = 1.645
+    return_value = portfolio_value.pct_change().shift(-1).dropna()
+    length = len(return_value)
+    daily_ret = return_value.mean()
+    daily_vol = return_value.std()
+    return -1*(daily_ret * 10 - daily_vol * (10**0.5) * z)
 
 #env.filters['my_substitution'] = my_substitution
                                     
@@ -144,7 +154,8 @@ def create_strategy():
                        datetime(2020, 4, 1),
                        datetime(2020, 7, 1),
                        datetime(2020, 10, 1),
-                       datetime(2021, 1, 1) ]
+                       datetime(2021, 1, 1),
+                       datetime(2021, 4, 1) ]
         
         if tw=='false': 
             all_data = pd.read_csv('data_for_trading_platform.csv')  
@@ -248,14 +259,14 @@ def create_strategy():
         
             portfolio_cum_returns = np.dot(returns, optimal_weights).cumprod()
             portfolio_value_new_window = portfolio_value.iloc[-1].item() * pd.Series(portfolio_cum_returns)
-            portfolio_value_new_window.index = pd.to_datetime(returns.index)
+            portfolio_value_new_window.index = pd.to_datetime(returns.index, format='%Y-%m-%d')
             portfolio_value = portfolio_value.append(portfolio_value_new_window) 
 
             # produce quarterly return
             hist_return_series.loc[len(hist_return_series)] = [str(start.year)+'Q'+str((start.month+2)//3), portfolio_cum_returns[-1]-1]
             
         if optimal_weights == None:
-            sharpe_ratio = avg_annual_return = annual_volatility = max_drawdown = 0
+            sharpe_ratio = avg_annual_return = annual_volatility = max_drawdown = ten_day_var = 0
             optimal_weights = [0, ]*len(tickers)
             hist_returns = None
             conn = psycopg2.connect(database=POSTGRESQL_DATABASE, user=POSTGRESQL_USER)
@@ -269,8 +280,9 @@ def create_strategy():
                                                  max_drawdown,
                                                  tw,
                                                  competition,
-                                                 hist_returns) 
-                           values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) returning strategy_id;""",
+                                                 hist_returns,
+                                                 ten_day_var) 
+                           values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) returning strategy_id;""",
                         (strategy_name, 
                          session['USERNAME'], 
                          create_date,
@@ -280,7 +292,8 @@ def create_strategy():
                          max_drawdown,
                          tw_digit,
                          competition,
-                         hist_returns
+                         hist_returns,
+                         ten_day_var
                         ) )
             strategy_id = cur.fetchone()[0]
             conn.commit()
@@ -303,6 +316,7 @@ def create_strategy():
         annual_volatility = portfolio_value.pct_change().std() * math.sqrt(252)
         sharpe_ratio = avg_annual_return/annual_volatility
         max_drawdown = - np.amin(np.divide(portfolio_value, np.maximum.accumulate(portfolio_value)) - 1)
+        ten_day_var = ten_day_VaR(portfolio_value)
         
         print('Sharpe ratio: ', sharpe_ratio, ', Return: ', avg_annual_return, ', Volatility: ', annual_volatility, ', Maximum Drawdown: ', max_drawdown)
 
@@ -320,8 +334,9 @@ def create_strategy():
                                              max_drawdown,
                                              tw,
                                              competition,
-                                             hist_returns) 
-                       values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) returning strategy_id;""",
+                                             hist_returns,
+                                             ten_day_var) 
+                       values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) returning strategy_id;""",
                     (strategy_name, 
                      session['USERNAME'], 
                      create_date,
@@ -331,7 +346,8 @@ def create_strategy():
                      max_drawdown,
                      tw_digit,
                      competition,
-                     hist_returns
+                     hist_returns,
+                     ten_day_var
                     ) )
         strategy_id = cur.fetchone()[0]
         conn.commit()
@@ -348,9 +364,15 @@ def create_strategy():
 
         # fig, ax = plt.subplots()
         # hist_return_series.hist(column='quarterly_returns', by='quarter', ax=ax)
-        hist_return_series.plot.bar(x='quarter', y='quarterly_returns').get_figure().savefig('static/img/quarterly_returns/'+str(strategy_id)+'.png')
+        hist_return_plot = hist_return_series.plot.bar(x='quarter', y='quarterly_returns').get_figure()
+        plt.tight_layout()
+        plt.xticks(rotation=45)
+        hist_return_plot.savefig('static/img/quarterly_returns/'+str(strategy_id)+'.png')
         plt.close()
         
+        print(portfolio_value.head())
+        print(portfolio_value.tail())
+        plt.xticks(rotation=45)
         plt.plot(portfolio_value.iloc[1:])
         plt.savefig('static/img/portfolio_values/'+str(strategy_id)+'.png')
         plt.close()
@@ -496,14 +518,14 @@ def create_strategy_upload():
         
             portfolio_cum_returns = np.dot(returns, optimal_weights).cumprod()
             portfolio_value_new_window = portfolio_value.iloc[-1].item() * pd.Series(portfolio_cum_returns)
-            portfolio_value_new_window.index = pd.to_datetime(returns.index)
+            portfolio_value_new_window.index = pd.to_datetime(returns.index, format='%Y-%m-%d')
             portfolio_value = portfolio_value.append(portfolio_value_new_window) 
 
             # produce quarterly return
             hist_return_series.loc[len(hist_return_series)] = [str(start), portfolio_cum_returns[-1]-1]
             
         if optimal_weights == None:
-            sharpe_ratio = avg_annual_return = annual_volatility = max_drawdown = 0
+            sharpe_ratio = avg_annual_return = annual_volatility = max_drawdown = ten_day_var = 0
             optimal_weights = [0, ]*len(tickers)
             hist_returns = None
             conn = psycopg2.connect(database=POSTGRESQL_DATABASE, user=POSTGRESQL_USER)
@@ -517,8 +539,9 @@ def create_strategy_upload():
                                                  max_drawdown,
                                                  tw,
                                                  competition,
-                                                 hist_returns) 
-                           values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) returning strategy_id;""",
+                                                 hist_returns,
+                                                 ten_day_var) 
+                           values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) returning strategy_id;""",
                         (strategy_name, 
                          session['USERNAME'], 
                          create_date,
@@ -528,7 +551,8 @@ def create_strategy_upload():
                          max_drawdown,
                          0, # tw_digit,
                          competition,
-                         hist_returns
+                         hist_returns,
+                         ten_day_var
                         ) )
             strategy_id = cur.fetchone()[0]
             conn.commit()
@@ -550,6 +574,7 @@ def create_strategy_upload():
         annual_volatility = portfolio_value.pct_change().std() * math.sqrt(252)
         sharpe_ratio = avg_annual_return/annual_volatility
         max_drawdown = - np.amin(np.divide(portfolio_value, np.maximum.accumulate(portfolio_value)) - 1)
+        ten_day_var = ten_day_VaR(portfolio_value)
         
         print('Sharpe ratio: ', sharpe_ratio, ', Return: ', avg_annual_return, ', Volatility: ', annual_volatility, ', Maximum Drawdown: ', max_drawdown)
 
@@ -567,7 +592,8 @@ def create_strategy_upload():
                                              max_drawdown,
                                              tw,
                                              competition,
-                                             hist_returns) values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) returning strategy_id;""",
+                                             hist_returns,
+                                             ten_day_var) values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) returning strategy_id;""",
                     (strategy_name, 
                      session['USERNAME'], 
                      create_date,
@@ -577,7 +603,8 @@ def create_strategy_upload():
                      max_drawdown,
                      0, # tw_digit,
                      competition,
-                     hist_returns
+                     hist_returns,
+                     ten_day_var
                     ) )
         strategy_id = cur.fetchone()[0]
         conn.commit()
@@ -594,9 +621,13 @@ def create_strategy_upload():
 
         # fig, ax = plt.subplots()
         # hist_return_series.hist(column='quarterly_returns', by='quarter', ax=ax)
-        hist_return_series.plot.bar(x='quarter', y='quarterly_returns').get_figure().savefig('static/img/quarterly_returns/'+str(strategy_id)+'.png')
+        hist_return_plot = hist_return_series.plot.bar(x='quarter', y='quarterly_returns').get_figure()
+        plt.tight_layout()
+        hist_return_plot.savefig('static/img/quarterly_returns/'+str(strategy_id)+'.png')
         plt.close()
         
+        print(portfolio_value.head())
+        print(portfolio_value.tail())
         plt.plot(portfolio_value.iloc[1:])
         plt.savefig('static/img/portfolio_values/'+str(strategy_id)+'.png')
         plt.close()
@@ -743,11 +774,16 @@ def post_page():
 
     print(asset_list)
 
+    with open('latest_trading_data.txt') as all_data:
+        all_data_close = json.load(all_data)
+
     return_data = {
         "strategy_content": strategy_content_list,
         "asset_content": asset_list,
         "comment_content": comment_list,
-        "comment_count": len(comment_list)
+        "comment_count": len(comment_list),
+        "asset_candidates": dict(asset_candidates + asset_candidates_tw),
+        "all_trading_data": all_data_close
     }
 
     return render_template('post_page.html', data=return_data, strategy_id=str(post_id))
@@ -843,51 +879,69 @@ def analysis_result():
     elif sortby == 'return':
         cur.execute("""select * from strategy 
                        where tw=%s and (competition not in (""" + confidential_competitions_placeholder + """) or author=%s) 
-                       order by return desc limit 200;""", 
+                       order by return desc limit 1000;""", 
                     (tw_digit,) + confidential_competitions_list + (session['USERNAME'],))
         sql_results = cur.fetchall()
-        num_records_hidden = min(5, len(sql_results))
+        # num_records_hidden = min(5, len(sql_results))
+        # if session['vip']==False:
+        #     for i in range(num_records_hidden):
+        #         for key in sql_results[i].keys():
+        #             if key not in ['return', 'sharpe_ratio', 'max_drawdown', 'volatility']:
+        #                 sql_results[i][key] = '*****'
         if session['vip']==False:
-            for i in range(num_records_hidden):
-                for key in sql_results[i].keys():
-                    if key not in ['return', 'sharpe_ratio', 'max_drawdown', 'volatility']:
-                        sql_results[i][key] = '*****'
+            return_threshold = 1
+            for record in sql_results:
+                if record['return'] > return_threshold:
+                    for key in record.keys():
+                        if key not in ['return', 'sharpe_ratio', 'max_drawdown', 'volatility']:
+                            record[key] = '*****'
+                else:
+                    break
     elif sortby == 'sharpe':
         cur.execute("""select * from strategy 
                        where tw=%s and (competition not in (""" + confidential_competitions_placeholder + """) or author=%s)  
-                       order by sharpe_ratio desc limit 200;""", 
+                       order by sharpe_ratio desc limit 1000;""", 
                     (tw_digit,) + confidential_competitions_list + (session['USERNAME'],))
         sql_results = cur.fetchall()
-        num_records_hidden = min(5, len(sql_results))
         if session['vip']==False:
-            for i in range(num_records_hidden):
-                for key in sql_results[i].keys():
-                    if key not in ['return', 'sharpe_ratio', 'max_drawdown', 'volatility']:
-                        sql_results[i][key] = '*****'
+            sharpe_threshold = 5
+            for record in sql_results:
+                if record['sharpe_ratio'] > sharpe_threshold:
+                    for key in record.keys():
+                        if key not in ['return', 'sharpe_ratio', 'max_drawdown', 'volatility']:
+                            record[key] = '*****'
+                else:
+                    break
     elif sortby == 'vol':
         cur.execute("""select * from strategy 
                        where tw=%s and (competition not in (""" + confidential_competitions_placeholder + """) or author=%s)  and volatility!=0 
-                       order by volatility asc limit 200;""", 
+                       order by volatility asc limit 1000;""", 
                     (tw_digit,) + confidential_competitions_list + (session['USERNAME'],))
         sql_results = cur.fetchall()
-        num_records_hidden = min(5, len(sql_results))
         if session['vip']==False:
-            for i in range(num_records_hidden):
-                for key in sql_results[i].keys():
-                    if key not in ['return', 'sharpe_ratio', 'max_drawdown', 'volatility']:
-                        sql_results[i][key] = '*****'
+            vol_threshold = 0.1
+            for record in sql_results:
+                if record['volatility'] < vol_threshold:
+                    for key in record.keys():
+                        if key not in ['return', 'sharpe_ratio', 'max_drawdown', 'volatility']:
+                            record[key] = '*****'
+                else:
+                    break
     elif sortby == 'mdd':
         cur.execute("""select * from strategy 
                        where tw=%s and (competition not in (""" + confidential_competitions_placeholder + """) or author=%s)  and max_drawdown!=0 
-                       order by max_drawdown asc limit 200;""", 
+                       order by max_drawdown asc limit 1000;""", 
                     (tw_digit,) + confidential_competitions_list + (session['USERNAME'],))
         sql_results = cur.fetchall()
-        num_records_hidden = min(5, len(sql_results))
         if session['vip']==False:
-            for i in range(num_records_hidden):
-                for key in sql_results[i].keys():
-                    if key not in ['return', 'sharpe_ratio', 'max_drawdown', 'volatility']:
-                        sql_results[i][key] = '*****'
+            mdd_threshold = 0.15
+            for record in sql_results:
+                if record['max_drawdown'] < mdd_threshold:
+                    for key in record.keys():
+                        if key not in ['return', 'sharpe_ratio', 'max_drawdown', 'volatility']:
+                            record[key] = '*****'
+                else:
+                    break
     cur.close()
     conn.close()
     return render_template('result.html', results=sql_results, tw=tw)
