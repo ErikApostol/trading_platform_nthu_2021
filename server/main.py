@@ -65,6 +65,29 @@ def ten_day_VaR(portfolio_value):
     daily_vol = return_value.std()
     return -1*(daily_ret * 10 - daily_vol * (10**0.5) * z)
 
+# risk_free_rate = 0.00899 # U.S. 5 Year Treasury at 11:31 PM EDT, Jun 28, 2021
+risk_free_rate = 0
+def Linear_Reg(x,y):
+    '''
+    input
+    x: market excess return, np.ndarray
+    y: portfolio excexx return, np.ndarray
+    
+    output
+    slope, intercept, R^2
+    '''
+    from sklearn import linear_model
+    import numpy
+    model = linear_model.LinearRegression(fit_intercept=True)
+    X = x[:,numpy.newaxis]
+    model.fit(X,y)
+    yhat = model.predict(X)
+    SSR = sum((y-yhat)**2)
+    SST = sum((y-numpy.mean(y))**2)
+    r_squared = 1 - (float(SSR))/SST
+    return model.coef_[0], model.intercept_, r_squared
+    # alpha = model.intercept_, beta = model.coef_[0]
+
 #env.filters['my_substitution'] = my_substitution
                                     
 
@@ -175,6 +198,9 @@ def create_strategy():
         portfolio_value = pd.Series([100])
         optimal_weights = None
         hist_return_series = pd.DataFrame(columns=['quarter', 'quarterly_returns'])
+
+        index_returns_full = pd.Series()
+        portfolio_returns_full = pd.Series()
         
         for i in range(len(start_dates)-3):
         
@@ -248,14 +274,28 @@ def create_strategy():
         
             start = start_dates[i+2]
             end   = start_dates[i+3]
+
+            if tw=='true':
+                index_ticker = '0050.TW'
+            elif tw=='false':
+                index_ticker = 'SPY'
         
-            data = pd.DataFrame({ ticker: stockpri(ticker, start, end) for ticker in tickers })
+            data = pd.DataFrame({ ticker: stockpri(ticker, start, end) for ticker in tickers+[index_ticker] })
             data = data.dropna()
             
             returns = data.pct_change() + 1
             returns = returns.dropna()
             log_returns = np.log(data.pct_change() + 1)
             log_returns = log_returns.dropna()
+
+            index_returns_3_months = returns[index_ticker]
+            data = data.drop(columns=[index_ticker])
+            returns = returns.drop(columns=[index_ticker])
+            log_returns = log_returns.drop(columns=[index_ticker])
+            portfolio_returns_3_months = pd.Series(np.dot(returns, optimal_weights).flatten())
+
+            index_returns_full = index_returns_full.append(index_returns_3_months, ignore_index=True)
+            portfolio_returns_full = portfolio_returns_full.append(portfolio_returns_3_months, ignore_index=True)
         
             portfolio_cum_returns = np.dot(returns, optimal_weights).cumprod()
             portfolio_value_new_window = portfolio_value.iloc[-1].item() * pd.Series(portfolio_cum_returns)
@@ -266,7 +306,7 @@ def create_strategy():
             hist_return_series.loc[len(hist_return_series)] = [str(start.year)+'Q'+str((start.month+2)//3), portfolio_cum_returns[-1]-1]
             
         if optimal_weights == None:
-            sharpe_ratio = avg_annual_return = annual_volatility = max_drawdown = ten_day_var = 0
+            sharpe_ratio = avg_annual_return = annual_volatility = max_drawdown = alpha = beta = r_squared = ten_day_var = 0
             optimal_weights = [0, ]*len(tickers)
             hist_returns = None
             conn = psycopg2.connect(database=POSTGRESQL_DATABASE, user=POSTGRESQL_USER)
@@ -281,8 +321,11 @@ def create_strategy():
                                                  tw,
                                                  competition,
                                                  hist_returns,
+                                                 alpha,
+                                                 beta,
+                                                 r_squared,
                                                  ten_day_var) 
-                           values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) returning strategy_id;""",
+                           values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) returning strategy_id;""",
                         (strategy_name, 
                          session['USERNAME'], 
                          create_date,
@@ -293,6 +336,9 @@ def create_strategy():
                          tw_digit,
                          competition,
                          hist_returns,
+                         alpha,
+                         beta,
+                         r_squared, 
                          ten_day_var
                         ) )
             strategy_id = cur.fetchone()[0]
@@ -317,6 +363,8 @@ def create_strategy():
         sharpe_ratio = avg_annual_return/annual_volatility
         max_drawdown = - np.amin(np.divide(portfolio_value, np.maximum.accumulate(portfolio_value)) - 1)
         ten_day_var = ten_day_VaR(portfolio_value)
+        beta, alpha, r_squared = Linear_Reg(index_returns_full.to_numpy().flatten()     - risk_free_rate, 
+                                            portfolio_returns_full.to_numpy().flatten() - risk_free_rate)
         
         print('Sharpe ratio: ', sharpe_ratio, ', Return: ', avg_annual_return, ', Volatility: ', annual_volatility, ', Maximum Drawdown: ', max_drawdown)
 
@@ -335,8 +383,11 @@ def create_strategy():
                                              tw,
                                              competition,
                                              hist_returns,
+                                             alpha,
+                                             beta,
+                                             r_squared,
                                              ten_day_var) 
-                       values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) returning strategy_id;""",
+                       values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) returning strategy_id;""",
                     (strategy_name, 
                      session['USERNAME'], 
                      create_date,
@@ -347,6 +398,9 @@ def create_strategy():
                      tw_digit,
                      competition,
                      hist_returns,
+                     alpha,
+                     beta,
+                     r_squared, 
                      ten_day_var
                     ) )
         strategy_id = cur.fetchone()[0]
@@ -366,13 +420,13 @@ def create_strategy():
         # hist_return_series.hist(column='quarterly_returns', by='quarter', ax=ax)
         hist_return_plot = hist_return_series.plot.bar(x='quarter', y='quarterly_returns').get_figure()
         plt.tight_layout()
-        plt.xticks(rotation=45)
+        # plt.xticks(rotation=45)
         hist_return_plot.savefig('static/img/quarterly_returns/'+str(strategy_id)+'.png')
         plt.close()
         
         print(portfolio_value.head())
         print(portfolio_value.tail())
-        plt.xticks(rotation=45)
+        # plt.xticks(rotation=45)
         plt.plot(portfolio_value.iloc[1:])
         plt.savefig('static/img/portfolio_values/'+str(strategy_id)+'.png')
         plt.close()
@@ -435,6 +489,7 @@ def create_strategy_upload():
 
         start_dates = list(np.arange(0, len(all_data), 63)) + [len(all_data)-1]
         
+
         for i in range(len(start_dates)-3):
         
             ### Take 6 months to backtest ###
@@ -515,6 +570,7 @@ def create_strategy_upload():
             returns = returns.dropna()
             log_returns = np.log(data.pct_change() + 1)
             log_returns = log_returns.dropna()
+
         
             portfolio_cum_returns = np.dot(returns, optimal_weights).cumprod()
             portfolio_value_new_window = portfolio_value.iloc[-1].item() * pd.Series(portfolio_cum_returns)
@@ -540,8 +596,11 @@ def create_strategy_upload():
                                                  tw,
                                                  competition,
                                                  hist_returns,
+                                                 alpha,
+                                                 beta,
+                                                 r_squared,
                                                  ten_day_var) 
-                           values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) returning strategy_id;""",
+                           values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) returning strategy_id;""",
                         (strategy_name, 
                          session['USERNAME'], 
                          create_date,
@@ -552,6 +611,9 @@ def create_strategy_upload():
                          0, # tw_digit,
                          competition,
                          hist_returns,
+                         0, # alpha,
+                         0, # beta,
+                         0, # r_squared, 
                          ten_day_var
                         ) )
             strategy_id = cur.fetchone()[0]
@@ -593,7 +655,10 @@ def create_strategy_upload():
                                              tw,
                                              competition,
                                              hist_returns,
-                                             ten_day_var) values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) returning strategy_id;""",
+                                             alpha,
+                                             beta,
+                                             r_squared,
+                                             ten_day_var) values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) returning strategy_id;""",
                     (strategy_name, 
                      session['USERNAME'], 
                      create_date,
@@ -604,6 +669,9 @@ def create_strategy_upload():
                      0, # tw_digit,
                      competition,
                      hist_returns,
+                     0, # alpha,
+                     0, # beta,
+                     0, # r_squared, 
                      ten_day_var
                     ) )
         strategy_id = cur.fetchone()[0]
@@ -787,7 +855,6 @@ def post_page():
     }
 
     return render_template('post_page.html', data=return_data, strategy_id=str(post_id))
-
 
 @main.route('/comment', methods=['POST'])
 #@login_required

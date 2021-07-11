@@ -36,6 +36,32 @@ src="https://www.maths.nottingham.ac.uk/plp/pmadw/LaTeXMathML.js">
                     <p>本網站使用S&amp;P 500以及元大臺灣50的成份股的歷史日資料。每次計算標的權重，都是取六個月的資料，依照馬可維兹的理論，畫出效率前緣，然後取夏普值最大的權重，再用接下來三個月的資料，觀察投資組合的價值如何變化。我們每三個月更新一次權重，再把許多三個月區間內投資組合的價值變動拼接起來，得到2015年中到2020年中投資組合的價值變動，再藉此求出平均年報酬、年波動率，再把報酬除以波動率得到整個投資期間的夏普值。另外我們還算出最大跌幅（maximum drawdown），就是投資過程中，會從到目前為止的最高點，最多下跌多少幅度。</p>
                     <p>固定預期報酬$p$，將波動率最小化的數學問題為：$\min_{w}w^{T}Cw$，限制條件為$\sum_{i}w_{i}=1$，$\sum_{i}w_{i}r_{i}=p$，$0\leq w_{i}\leq1 \forall i$，其中$\displaystyle{ A = \left[ w_{1}   w_{2}   \cdots   w_{N} \right]^T } $為權重，$r=[r_{1}  r_{2}  \cdots  r_{N}]^{T}$為投資組合中各個成份標的的平均報酬，$C$為各個成份標的共變異數，$N$為投資組合中有幾個成份標的。
                     </p>
+
+                    <h5>10-day 95% VaR 簡介</h5>
+                    
+                    <p>風險值 (value-at-risk, 簡稱VaR) 是風險管理中用以預估投資組合損失的一種測度，基本上就是統計中百分位數的概念。在給定一個信心水準（此為95%）後，10-day 95% VaR是計算10日內，投資組合的最大損失為何。</p>
+                    
+                    <p>例如，當某個投資組合的10-day 5% VaR = -\$100（負號表示損失）時，表示該投資組合在十日內的最大損失，在信心水準為95%時，為\$100；亦即該投資組合在十日內的最大損失，只有0.05的機率會超過\$100。</p>
+                    
+                    <p>以下針對資產報酬率，在常態分配的假設下，10-day 95% VaR 風險值的計算方式如下：</p>
+                    
+                    <p>給定資產的每日投組價值後，我們可以計算出該投組的（每日）報酬率與（每日）波動率。利用常態分配的假設，我們令$\mu$為十日報酬率（亦即（每日）報酬率 x 10）、$\sigma$為十日波動率（亦即（每日）波動率$\times\sqrt{10}$），則 10-day 5% VaR 的公式為：$-\left(\mu-1.645\times\sigma\right)$。</p>
+                    
+                    
+                    
+                    <h5>投資組合的alpha、beta值簡介</h5>
+                    
+                    <p>在評估投資組合的表現時，經常使用的是絕對性的指標，例如報酬率、波動率、夏普指數，MDD等，不過也有相對性的指標alpha、beta值。比較投組與另一個標的（例如大盤指數），我們可以透過回歸式，估計出作為超額報酬的alpha值，以及作為相關性的beta值。Alpha值表示投組的獲利能力，越高越好。Beta值代表了投組對系統性風險的曝險程度，越低越好。</p>
+                    
+                    <p>根據CAPM模型，給定投組報酬$r_{\mbox{port}}$ 、大盤指數$r_{\mbox{market}}$以及無風險利率$r_{\mbox{risk-free}}$，beta值可以藉由以下公式得出：$E\left[r_{\mbox{port}}\right]-r_{\mbox{risk-free}}=\beta\left(E\left[r_{\mbox{market}}\right]-r_{\mbox{risk-free}}\right)$。alpha值則是藉由計算實際的投組報酬與由CAPM得到的理論報酬的差得到，公式為：$\alpha=r_{\mbox{port}}-\left(r_{\mbox{risk-free}}+\beta\left(r_{\mbox{market}}-r_{\mbox{risk-free}}\right)\right)$。</p>
+                    
+                    <p>當給定一組時間序列時，alpha、beta值可以利用線性回歸的方式得出。我們可以將上述的式子改寫成以下的形式：$Y=\alpha+\beta X+\epsilon$其中$Y=r_{\mbox{port}}-r_{\mbox{risk-free}}$、$X=r_{\mbox{market}}-r_{\mbox{risk-free}}$。透過此回歸式，我們除了可以得到alpha、beta值外，也可以計算出值，用以衡量此模型的解釋力。</p>
+
+                    <p>在本擂台上，不限台股的投組使用的大盤指數是SPY，台股的投組使用的大盤指數是0050.TW，無風險利率暫定為0。</p>
+
+
+
+
                 </div>
             </div>
             <div class="card mb-4">
@@ -428,6 +454,8 @@ src="https://www.maths.nottingham.ac.uk/plp/pmadw/LaTeXMathML.js">
                     <p>Feb 24, 2021: 將未結束競賽的結果隱藏</p>
                     <p>Feb 25, 2021: 分析成功完成的flash訊息加入分析結果連結</p>
                     <p>Mar 15, 2021: 資料庫改用PostgreSQL</p>
+
+                    <p>Jun 17, 2021: 加入NASDAQ 100成份股資料</p>
 
                     <p></p>
                 </div>

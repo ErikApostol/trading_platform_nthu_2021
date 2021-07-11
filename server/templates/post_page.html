@@ -26,6 +26,20 @@
                                         <a class="tag is-rounded is-warning" href="/forum/filter?filter={{ data['strategy_content']['create_date'] }}">
                                             {{ data['strategy_content']['create_date'] }}
                                         </a>
+                                        <div
+                                              class="fb-share-button"
+                                                data-href="http://qffers.qf.nthu.edu.tw:8002/post_page?post_id={{ data['strategy_content']['strategy_id'] }}"
+                                                  data-layout="button_count"
+                                                    data-size="small"
+                                                    >
+                                                      <a
+                                                              target="_blank"
+                                                                  href="https://www.facebook.com/sharer/sharer.php?u=http%3A%2F%2Fqffers.qf.nthu.edu.tw%3A8002%2Fpost_page%3Fpost_id%3D{{ data['strategy_content']['strategy_id'] }}&amp;src=sdkpreparse"
+                                                                      class="fb-xfbml-parse-ignore"
+                                                                        >
+                                                                            分享至 facebook
+                                                                              </a>
+                                        </div>
                                     </p>
                                 </p>
                             </div>
@@ -89,6 +103,15 @@
                                                         <li class="text-content font-weight-light">
                                                             10日VaR：{{ '%0.4f' | format(data['strategy_content']['ten_day_var']|float) }}
                                                         </li>
+                                                        <li class="text-content font-weight-light">
+                                                            Alpha：{{ '%0.4f' | format(data['strategy_content']['alpha']|float) }}
+                                                        </li>
+                                                        <li class="text-content font-weight-light">
+                                                            Beta：{{ '%0.4f' | format(data['strategy_content']['beta']|float) }}
+                                                        </li>
+                                                        <li class="text-content font-weight-light">
+                                                            R_squared：{{ '%0.4f' | format(data['strategy_content']['r_squared']|float) }}
+                                                        </li>
                                                     </ul>
                                                     <h2>
                                                         若資產比重與投組表現全為0，表示無資料或此投資組合無法畫出馬可維茲邊界。
@@ -100,7 +123,7 @@
                                 </form>
 
                                 <form>
-                                    <div class="box forum">
+                                   <div class="box forum">
                                         <article class="media">
                                             <div class="media-content">
                                                 <div class="content list-forum">
@@ -167,9 +190,11 @@
             </div>
         </main>
     </div>
+    <div id="fb-root"></div>
 </div>
 {% endblock %}
 
 {% block script %}
     <script src="{{ url_for('static', filename='js/forum.js') }}"></script>
+    <script async defer crossorigin="anonymous" src="https://connect.facebook.net/zh_TW/sdk.js#xfbml=1&version=v11.0" nonce="N16wUKtS"></script>
 {% endblock %}
