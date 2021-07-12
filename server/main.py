@@ -111,7 +111,22 @@ def Linear_Reg(x,y):
 
 @main.route('/')
 def index():
-    return render_template('index.html')
+    
+    conn = psycopg2.connect(database=POSTGRESQL_DATABASE, user=POSTGRESQL_USER)
+    cur = conn.cursor(cursor_factory = psycopg2.extras.DictCursor)
+    
+    # Number of effective users
+    cur.execute('select count(b.a) as num_effective_users from (select min(strategy_id) as a from strategy group by author) as b')
+    num_effective_users = cur.fetchone()['num_effective_users']
+
+    # Number of effective strategies
+    cur.execute('select count(strategy_id) as num_effective_strategies from strategy where sharpe_ratio!=0')
+    num_effective_strategies = cur.fetchone()['num_effective_strategies']
+    
+    cur.close()
+    conn.close()    
+
+    return render_template('index.html', num_effective_users=num_effective_users, num_effective_strategies=num_effective_strategies)
     # return render_template('index_temp_0314.html')
 
 
@@ -178,7 +193,8 @@ def create_strategy():
                        datetime(2020, 7, 1),
                        datetime(2020, 10, 1),
                        datetime(2021, 1, 1),
-                       datetime(2021, 4, 1) ]
+                       datetime(2021, 4, 1),
+                       datetime(2021, 7, 1) ]
         
         if tw=='false': 
             all_data = pd.read_csv('data_for_trading_platform.csv')  
